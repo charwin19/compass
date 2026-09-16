@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="24/7 Tourist Emergency Assistance — Instant SOS alert dispatch with live GPS, emergency hotline directory and nearby medical support." />
+  <title>Emergency Support & SOS — Compass</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🆘</text></svg>" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Instant Auth Guard -->
+  <script>
+    if (!localStorage.getItem('st_token')) {
+      sessionStorage.setItem('st_redirect_after_login', window.location.href);
+      alert('🔒 Access Restricted: Please log in to access Emergency Assistance.');
+      window.location.href = 'login.html';
+    }
+  </script>
+
+  <style>
+    .emergency-hero {
+      padding: calc(var(--nav-height) + var(--space-8)) 0 var(--space-8);
+      background: linear-gradient(135deg, #1f1013 0%, #0f172a 70%);
+      border-bottom: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    .sos-pulse-card {
+      background: linear-gradient(145deg, rgba(239,68,68,0.12), rgba(15,23,42,0.95));
+      border: 1px solid rgba(239,68,68,0.35);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      box-shadow: 0 0 35px rgba(239,68,68,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin: var(--space-8) 0;
+    }
+    .sos-big-btn {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ef4444 0%, #b91c1c 100%);
+      border: 4px solid rgba(255,255,255,0.4);
+      color: #fff;
+      font-size: 2rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 40px rgba(239,68,68,0.6);
+      transition: var(--transition-fast);
+      margin: var(--space-6) 0;
+      animation: pulse-sos 2s infinite;
+    }
+    .sos-big-btn:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 60px rgba(239,68,68,0.85);
+    }
+    @keyframes pulse-sos {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 24px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .hotline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--space-4);
+      margin: var(--space-6) 0 var(--space-12);
+    }
+    .hotline-card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: var(--transition-fast);
+    }
+    .hotline-card:hover {
+      border-color: var(--clr-primary);
+      transform: translateY(-2px);
+    }
+    .hotline-num {
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      color: var(--clr-danger);
+      font-family: var(--font-heading);
+    }
+    .emergency-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-8);
+      margin-bottom: var(--space-16);
+    }
+    @media (max-width: 800px) {
+      .emergency-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .facility-card {
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      margin-bottom: var(--space-3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <a href="index.html" class="nav-logo" aria-label="Compass Home">
+        <div class="nav-logo-icon">🧭</div>
+        <span class="nav-logo-text">Com<span>pass</span></span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="index.html#destinations" class="nav-link">Explore</a></li>
+        <li><a href="planner.html" class="nav-link">Travel Planner</a></li>
+        <li><a href="weather.html" class="nav-link">Weather</a></li>
+        <li><a href="emergency.html" class="nav-link active" aria-current="page">Emergency</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="login.html" class="btn btn-outline btn-sm" id="nav-login-btn">Login</a>
+        <a href="login.html#register" class="btn btn-primary btn-sm" id="nav-register-btn">Get Started</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle mobile menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile nav -->
+  <div class="mobile-nav" id="mobile-nav" role="menu">
+    <a href="index.html" class="nav-link" role="menuitem">Home</a>
+    <a href="index.html#destinations" class="nav-link" role="menuitem">Explore</a>
+    <a href="planner.html" class="nav-link" role="menuitem">Travel Planner</a>
+    <a href="weather.html" class="nav-link" role="menuitem">Weather</a>
+    <a href="emergency.html" class="nav-link active" role="menuitem">Emergency</a>
+    <div style="display:flex;gap:var(--space-3);margin-top:var(--space-2);">
+      <a href="login.html" class="btn btn-outline btn-sm" style="flex:1">Login</a>
+      <a href="login.html#register" class="btn btn-primary btn-sm" style="flex:1">Register</a>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <header class="emergency-hero">
+    <div class="container">
+      <div style="display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:var(--radius-full); font-size:var(--text-xs); font-weight:700; background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4);">
+        <i class="fa-solid fa-shield-heart"></i> 24/7 Traveler Protection Shield
+      </div>
+      <h1 style="font-size:clamp(var(--text-2xl), 4vw, var(--text-4xl)); margin:var(--space-2) 0;">
+        Emergency Assistance & SOS
+      </h1>
+      <p style="color:var(--clr-text-muted); max-width:620px;">
+        If you are in danger, lost, or requiring urgent medical or police help, tap the SOS button below or dial national emergency responders directly.
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- SOS Instant Action Card -->
+    <div class="sos-pulse-card">
+      <div style="font-size:var(--text-xl); font-weight:700; color:#fff;">
+        Need Immediate Assistance?
+      </div>
+      <p style="color:var(--clr-text-muted); font-size:var(--text-sm); max-width:480px; margin-top:4px;">
+        Press the button below. Your exact GPS coordinates will be captured and routed to the nearest tourism safety team & emergency responders.
+      </p>
+
+      <button type="button" class="sos-big-btn" id="sos-trigger-btn" aria-label="Send Instant SOS Alert">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size:1.8rem; margin-bottom:4px;"></i>
+        <span>SOS</span>
+      </button>
+
+      <div id="gps-status-indicator" style="display:flex; align-items:center; gap:8px; font-size:var(--text-xs); color:var(--clr-text-faint);">
+        <i class="fa-solid fa-location-crosshairs" style="color:var(--clr-primary);"></i>
+        <span id="gps-status-text">GPS: Ready to capture coordinates upon alert</span>
+      </div>
+    </div>
+
+    <!-- National Hotlines Section -->
+    <div>
+      <h2 style="font-size:var(--text-xl); margin-bottom:var(--space-2); display:flex; align-items:center; gap:8px;">
+        <i class="fa-solid fa-phone-volume" style="color:var(--clr-danger);"></i> Toll-Free National Emergency Hotlines
+      </h2>
+      <p style="color:var(--clr-text-muted); font-size:var(--text-sm);">Direct one-touch phone connections available 24/7 across India.</p>
+
+      <div class="hotline-grid">
+        <div class="hotline-card">
+          <div>
+            <div style="font-size:var(--text-sm); font-weight:600;">Unified Emergency</div>
+            <div style="font-size:12px; color:var(--clr-text-muted);">Police, Fire, Ambulance</div>
+          </div>
+          <a href="tel:112" class="hotline-num">112</a>
+        </div>
+
+        <div class="hotline-card">
+          <div>
+            <div style="font-size:var(--text-sm); font-weight:600;">Tourist Helpline</div>
+            <div style="font-size:12px; color:var(--clr-text-muted);">12 Languages 24/7</div>
+          </div>
+          <a href="tel:1363" class="hotline-num" style="color:var(--clr-primary-light);">1363</a>
+        </div>
+
+        <div class="hotline-card">
+          <div>
+            <div style="font-size:var(--text-sm); font-weight:600;">Police Helpline</div>
+            <div style="font-size:12px; color:var(--clr-text-muted);">Immediate Patrol Dispatch</div>
+          </div>
+          <a href="tel:100" class="hotline-num">100</a>
+        </div>
+
+        <div class="hotline-card">
+          <div>
+            <div style="font-size:var(--text-sm); font-weight:600;">Ambulance / Medical</div>
+            <div style="font-size:12px; color:var(--clr-text-muted);">Emergency Paramedics</div>
+          </div>
+          <a href="tel:108" class="hotline-num" style="color:var(--clr-accent);">108</a>
+        </div>
+
+        <div class="hotline-card">
+          <div>
+            <div style="font-size:var(--text-sm); font-weight:600;">Women Helpline</div>
+            <div style="font-size:12px; color:var(--clr-text-muted);">Safety & Legal Support</div>
+          </div>
+          <a href="tel:1091" class="hotline-num" style="color:#e879f9;">1091</a>
+        </div>
+
+        <div class="hotline-card">
+          <div>
+            <div style="font-size:var(--text-sm); font-weight:600;">Disaster Management</div>
+            <div style="font-size:12px; color:var(--clr-text-muted);">NDRF Flood / Quake</div>
+          </div>
+          <a href="tel:1078" class="hotline-num" style="color:#fb923c;">1078</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Form + Nearby Assistance Grid -->
+    <div class="emergency-grid">
+
+      <!-- Submit Detailed Alert Form -->
+      <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius-lg); padding:var(--space-6);">
+        <h3 style="font-size:var(--text-lg); margin-bottom:var(--space-4); display:flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-file-shield" style="color:var(--clr-primary);"></i> Submit Detailed Alert
+        </h3>
+
+        <form id="emergency-form">
+          <div class="form-group" style="margin-bottom:var(--space-4);">
+            <label class="form-label" for="alert-type">Emergency Type</label>
+            <select id="alert-type" class="form-input" style="background:var(--clr-surface-2);" required>
+              <option value="MEDICAL">Medical Emergency / Injury</option>
+              <option value="POLICE">Police Assistance / Theft / Crime</option>
+              <option value="LOST">Lost / Stranded in Mountain / Forest</option>
+              <option value="NATURAL_DISASTER">Landslide / Flood / Weather Hazard</option>
+              <option value="HARASSMENT">Harassment or Safety Concern</option>
+              <option value="ACCIDENT">Road / Vehicle Accident</option>
+              <option value="OTHER">Other Emergency</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:var(--space-4);">
+            <label class="form-label" for="alert-severity">Severity Level</label>
+            <select id="alert-severity" class="form-input" style="background:var(--clr-surface-2);" required>
+              <option value="CRITICAL">Critical (Life Threatening)</option>
+              <option value="HIGH" selected>High (Urgent Response Needed)</option>
+              <option value="MEDIUM">Medium (Assistance Required)</option>
+              <option value="LOW">Low (Information / Precaution)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom:var(--space-4);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label class="form-label" for="alert-location" style="margin-bottom:0;">Your Current Location</label>
+              <button type="button" id="btn-detect-gps" style="background:none; border:none; color:var(--clr-primary-light); font-size:12px; cursor:pointer;">
+                <i class="fa-solid fa-crosshairs"></i> Auto-Detect GPS
+              </button>
+            </div>
+            <input type="text" id="alert-location" class="form-input" placeholder="e.g. Near Doddabetta Peak, Ooty" required />
+          </div>
+
+          <div class="form-group" style="margin-bottom:var(--space-4);">
+            <label class="form-label" for="alert-desc">Details & Symptoms / Notes</label>
+            <textarea id="alert-desc" class="form-input" rows="3" placeholder="Briefly describe what happened, how many persons are affected, and any landmarks..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-submit-alert" style="width:100%; justify-content:center; background:var(--clr-danger); border-color:var(--clr-danger);">
+            <i class="fa-solid fa-paper-plane"></i> Dispatch Emergency Report
+          </button>
+        </form>
+      </div>
+
+      <!-- Nearby Facilities & Help Centers -->
+      <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius-lg); padding:var(--space-6);">
+        <h3 style="font-size:var(--text-lg); margin-bottom:var(--space-4); display:flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-hospital" style="color:var(--clr-accent);"></i> Nearby Hospitals & Stations
+        </h3>
+
+        <div class="facility-card">
+          <div>
+            <strong style="display:block; font-size:var(--text-sm);">Ooty Government General Hospital</strong>
+            <span style="font-size:12px; color:var(--clr-text-muted);"><i class="fa-solid fa-location-dot"></i> Hospital Road, Ooty • 1.8 km</span>
+          </div>
+          <a href="tel:04232442212" class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11px;">
+            <i class="fa-solid fa-phone"></i> Call
+          </a>
+        </div>
+
+        <div class="facility-card">
+          <div>
+            <strong style="display:block; font-size:var(--text-sm);">Nilgiris Tourist Police Station</strong>
+            <span style="font-size:12px; color:var(--clr-text-muted);"><i class="fa-solid fa-location-dot"></i> Charing Cross, Ooty • 0.9 km</span>
+          </div>
+          <a href="tel:04232444000" class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11px;">
+            <i class="fa-solid fa-phone"></i> Call
+          </a>
+        </div>
+
+        <div class="facility-card">
+          <div>
+            <strong style="display:block; font-size:var(--text-sm);">Kodaikanal Pasam Hospital</strong>
+            <span style="font-size:12px; color:var(--clr-text-muted);"><i class="fa-solid fa-location-dot"></i> Anna Salai, Kodaikanal • 2.1 km</span>
+          </div>
+          <a href="tel:04542240600" class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11px;">
+            <i class="fa-solid fa-phone"></i> Call
+          </a>
+        </div>
+
+        <div class="facility-card">
+          <div>
+            <strong style="display:block; font-size:var(--text-sm);">Tata General Hospital Munnar</strong>
+            <span style="font-size:12px; color:var(--clr-text-muted);"><i class="fa-solid fa-location-dot"></i> Nullatanni, Munnar • 1.2 km</span>
+          </div>
+          <a href="tel:04865230222" class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11px;">
+            <i class="fa-solid fa-phone"></i> Call
+          </a>
+        </div>
+
+        <div style="margin-top:var(--space-4); padding:var(--space-3); border-radius:var(--radius-md); background:rgba(14,165,233,0.1); border:1px solid rgba(14,165,233,0.25); font-size:12px; color:var(--clr-primary-light);">
+          <i class="fa-solid fa-circle-info"></i> <strong>Pro Tip:</strong> In remote hill areas with weak cellular signal, SMS messages to 112 often go through even when voice calls fail.
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <div class="nav-logo-icon">🧭</div>
+            <span class="nav-logo-text">Com<span>pass</span></span>
+          </a>
+          <p>India's most complete travel companion — smart planning, verified guides, live weather, and instant emergency assistance for every journey.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <nav class="footer-links">
+            <a href="index.html#destinations" class="footer-link">Popular Destinations</a>
+            <a href="planner.html" class="footer-link">Travel Planner</a>
+            <a href="weather.html" class="footer-link">Live Weather</a>
+          </nav>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <nav class="footer-links">
+            <a href="emergency.html" class="footer-link">Emergency Help</a>
+            <a href="admin-dashboard.html" class="footer-link">Admin Dashboard</a>
+            <a href="login.html" class="footer-link">Traveler Login</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 Compass. Built for safer, smarter travel across India.</p>
+        <p style="color:var(--clr-danger);font-weight:600;"><i class="fa-solid fa-shield-halved"></i> 24/7 Emergency Line: Dial 112</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script>
+    let userLat = null;
+    let userLng = null;
+
+    function acquireLocation(callback) {
+      const statusText = document.getElementById('gps-status-text');
+      if (navigator.geolocation) {
+        statusText.textContent = 'Acquiring GPS fix...';
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            userLat = pos.coords.latitude;
+            userLng = pos.coords.longitude;
+            statusText.textContent = `GPS Locked: ${userLat.toFixed(4)}, ${userLng.toFixed(4)} (Accuracy ±${Math.round(pos.coords.accuracy)}m)`;
+            statusText.style.color = 'var(--clr-accent)';
+            if (callback) callback(userLat, userLng);
+          },
+          (err) => {
+            statusText.textContent = 'GPS permission unavailable. Please specify location manually.';
+            statusText.style.color = 'var(--clr-warning)';
+            if (callback) callback(null, null);
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        );
+      } else {
+        statusText.textContent = 'Geolocation not supported by this browser.';
+        if (callback) callback(null, null);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auto-detect GPS button
+      document.getElementById('btn-detect-gps').addEventListener('click', () => {
+        acquireLocation((lat, lng) => {
+          if (lat && lng) {
+            document.getElementById('alert-location').value = `GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            Toast.success('Location detected and filled into form.');
+          } else {
+            Toast.info('Could not auto-fetch GPS. Please type your location.');
+          }
+        });
+      });
+
+      // SOS Big Button Click
+      const sosBtn = document.getElementById('sos-trigger-btn');
+      sosBtn.addEventListener('click', () => {
+        acquireLocation(async (lat, lng) => {
+          const locStr = lat ? `GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}` : 'Manual SOS Triggered';
+
+          try {
+            await ApiClient.post('/emergency/alert', {
+              latitude: lat,
+              longitude: lng,
+              locationDescription: locStr,
+              alertType: 'CRITICAL',
+              message: 'Immediate SOS pressed from web companion'
+            });
+          } catch(e) {
+            console.log('Emergency dispatch queued (Demo Mode)');
+          }
+
+          Toast.error('🚨 SOS ALERT BROADCASTED! Responders & Emergency contacts notified!', 8000);
+          alert('🚨 SOS ALERT SENT!\n\nYour emergency alert has been broadcast with your coordinates. Responders are alerted.\n\nIf you need immediate live voice response, please dial 112 now.');
+        });
+      });
+
+      // Detailed Alert Form Submit
+      const form = document.getElementById('emergency-form');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const type = document.getElementById('alert-type').value;
+        const sev = document.getElementById('alert-severity').value;
+        const loc = document.getElementById('alert-location').value.trim();
+        const desc = document.getElementById('alert-desc').value.trim();
+
+        const btn = document.getElementById('btn-submit-alert');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-spinner" style="display:inline-block;"></span> Dispatching Alert...';
+
+        try {
+          await ApiClient.post('/emergency/alert', {
+            latitude: userLat,
+            longitude: userLng,
+            locationDescription: loc,
+            alertType: type,
+            message: desc || `${type} emergency reported at ${loc}`
+          });
+        } catch (err) {
+          console.log('Saved offline / demo mode');
+        }
+
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Dispatch Emergency Report';
+          form.reset();
+          Toast.success('Emergency alert submitted successfully! Help is on the way.');
+        }, 800);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Compass — Plan your perfect journey with personalized destinations, local guides, hotels, live weather and emergency assistance. Explore India's finest destinations." />
+  <meta name="keywords" content="Compass travel, travel planner, India tourism, local guides, hotel booking, travel safety, emergency assistance" />
+  <meta property="og:title" content="Compass — Explore More. Travel Smarter. Stay Safer." />
+  <meta property="og:description" content="Your all-in-one travel companion for safe, personalized journeys across India." />
+  <title>Compass — Explore More. Travel Smarter. Stay Safer.</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/home.css" />
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- ====================================================
+       NAVBAR
+       ==================================================== -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+
+      <!-- Logo -->
+      <a href="index.html" class="nav-logo" aria-label="Compass Home">
+        <div class="nav-logo-icon">🧭</div>
+        <span class="nav-logo-text">Com<span>pass</span></span>
+      </a>
+
+      <!-- Desktop nav links -->
+      <ul class="nav-links" role="list">
+        <li><a href="index.html"        class="nav-link active" aria-current="page">Home</a></li>
+        <li><a href="#destinations"     class="nav-link">Explore</a></li>
+        <li><a href="planner.html"      class="nav-link">Travel Planner</a></li>
+        <li><a href="weather.html"      class="nav-link">Weather</a></li>
+        <li><a href="emergency.html"    class="nav-link">Emergency</a></li>
+      </ul>
+
+      <!-- Desktop CTA -->
+      <div class="nav-cta">
+        <a href="login.html" class="btn btn-outline btn-sm" id="nav-login-btn">Login</a>
+        <a href="login.html#register" class="btn btn-primary btn-sm" id="nav-register-btn">Get Started</a>
+      </div>
+
+      <!-- Mobile hamburger -->
+      <button class="hamburger" id="hamburger" aria-label="Toggle mobile menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile drawer -->
+  <div class="mobile-nav" id="mobile-nav" role="menu">
+    <a href="index.html"     class="nav-link active" role="menuitem">Home</a>
+    <a href="#destinations"  class="nav-link" role="menuitem">Explore</a>
+    <a href="planner.html"   class="nav-link" role="menuitem">Travel Planner</a>
+    <a href="weather.html"   class="nav-link" role="menuitem">Weather</a>
+    <a href="emergency.html" class="nav-link" role="menuitem">Emergency</a>
+    <div style="display:flex;gap:var(--space-3);margin-top:var(--space-2);">
+      <a href="login.html"            class="btn btn-outline btn-sm" style="flex:1">Login</a>
+      <a href="login.html#register"   class="btn btn-primary btn-sm" style="flex:1">Register</a>
+    </div>
+  </div>
+
+  <!-- ====================================================
+       HERO
+       ==================================================== -->
+  <section class="hero" id="home" aria-labelledby="hero-heading">
+    <div class="hero-bg" id="hero-bg"></div>
+    <div class="hero-overlay"></div>
+
+    <!-- Particle canvas -->
+    <canvas class="hero-particles" id="particles-canvas"></canvas>
+
+    <div class="container">
+      <div class="hero-content">
+
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-dot"></span>
+          India's Smartest Travel Companion
+        </div>
+
+        <h1 id="hero-heading">
+          Explore More.<br/>
+          Travel <em>Smarter.</em><br/>
+          Stay Safer.
+        </h1>
+
+        <p class="hero-subtitle">
+          Plan your perfect journey with personalized destinations, local guides,
+          curated hotels, live weather updates, hidden gems, and real-time
+          emergency assistance — all in one platform.
+        </p>
+
+        <div class="hero-cta">
+          <a href="planner.html" class="btn btn-primary btn-lg" id="hero-plan-btn">
+            <i class="fa-solid fa-map-location-dot"></i>
+            Plan My Trip
+          </a>
+          <a href="#destinations" class="btn btn-outline btn-lg" id="hero-explore-btn">
+            <i class="fa-solid fa-compass"></i>
+            Explore Destinations
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-num">50+</div>
+            <div class="hero-stat-label">Destinations</div>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat">
+            <div class="hero-stat-num">200+</div>
+            <div class="hero-stat-label">Local Guides</div>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat">
+            <div class="hero-stat-num">1000+</div>
+            <div class="hero-stat-label">Happy Travelers</div>
+          </div>
+          <div class="hero-divider"></div>
+          <div class="hero-stat">
+            <div class="hero-stat-num">24/7</div>
+            <div class="hero-stat-label">Emergency Support</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator" aria-hidden="true">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       FEATURES SECTION
+       ==================================================== -->
+  <section class="section features-section" id="features" aria-labelledby="features-heading">
+    <div class="container">
+      <div class="features-header">
+        <div class="section-label">Everything You Need</div>
+        <h2 class="heading-2" id="features-heading">
+          One Platform for Your<br/>Complete Journey
+        </h2>
+        <p class="text-muted" style="margin-top:var(--space-4);max-width:480px;margin-inline:auto;">
+          From planning to emergency assistance — we've got every step of your travel covered with smart, real-time tools.
+        </p>
+        <div class="divider"></div>
+      </div>
+
+      <div class="features-grid">
+
+        <article class="feature-card reveal" aria-label="Smart Travel Planner feature">
+          <span class="feature-icon">🗺️</span>
+          <h3>Smart Travel Planner</h3>
+          <p>Enter your destination, budget, and days — get a fully personalized day-wise itinerary in seconds.</p>
+        </article>
+
+        <article class="feature-card reveal reveal-delay-1" aria-label="Local Guides feature">
+          <span class="feature-icon">🧑‍🦯</span>
+          <h3>Local Guides</h3>
+          <p>Connect with verified local experts who know every hidden corner, shortcut, and story of your destination.</p>
+        </article>
+
+        <article class="feature-card reveal reveal-delay-2" aria-label="Hotels feature">
+          <span class="feature-icon">🏨</span>
+          <h3>Hotels for Every Budget</h3>
+          <p>Budget homestays to luxury resorts — curated hotels filtered by your budget and preferred comfort level.</p>
+        </article>
+
+        <article class="feature-card reveal reveal-delay-3" aria-label="Best Routes feature">
+          <span class="feature-icon">🛣️</span>
+          <h3>Best Routes</h3>
+          <p>Optimized travel routes with estimated time, distance, road conditions, and important stops along the way.</p>
+        </article>
+
+        <article class="feature-card reveal reveal-delay-1" aria-label="Hidden Places feature">
+          <span class="feature-icon">💎</span>
+          <h3>Hidden Gems</h3>
+          <p>Discover lesser-known treasures that most tourists never find — the real soul of every destination.</p>
+        </article>
+
+        <article class="feature-card reveal reveal-delay-2" aria-label="Live Weather feature">
+          <span class="feature-icon">🌤️</span>
+          <h3>Live Weather</h3>
+          <p>Real-time weather data with forecasts, rain probability, and personalized travel recommendations.</p>
+        </article>
+
+        <article class="feature-card reveal reveal-delay-3" aria-label="Emergency Assistance feature" style="border-color: rgba(239,68,68,0.2);">
+          <span class="feature-icon">🚨</span>
+          <h3>Emergency Assistance</h3>
+          <p>One-tap emergency alerts with GPS location, sent instantly to our emergency response team. Your safety first.</p>
+        </article>
+
+        <article class="feature-card reveal reveal-delay-4" aria-label="Day Wise Plan feature">
+          <span class="feature-icon">📅</span>
+          <h3>Day-wise Itinerary</h3>
+          <p>Hour-by-hour travel plans respecting opening times, distances, budget, and your travel preferences.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       POPULAR DESTINATIONS
+       ==================================================== -->
+  <section class="section destinations-section" id="destinations" aria-labelledby="destinations-heading">
+    <div class="container">
+
+      <div class="destinations-header">
+        <div>
+          <div class="section-label">Top Picks</div>
+          <h2 class="heading-2" id="destinations-heading">Popular Destinations</h2>
+          <p class="text-muted" style="margin-top:var(--space-3);">Handpicked destinations loved by thousands of travelers</p>
+        </div>
+        <a href="planner.html" class="btn btn-outline" id="view-all-dest-btn">
+          View All <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="destinations-grid" id="destinations-grid">
+
+        <!-- Card 1 — Ooty -->
+        <article class="destination-card reveal" data-dest="Ooty">
+          <img
+            class="dest-img"
+            src="images/destinations/ooty.jpg"
+            alt="Ooty — Queen of Hill Stations"
+            loading="lazy"
+          />
+          <div class="dest-overlay"></div>
+          <div class="dest-content">
+            <span class="dest-tag">Hill Station</span>
+            <h3>Ooty</h3>
+            <p>Queen of hill stations — lush tea gardens, misty mountains &amp; colonial charm.</p>
+            <div class="dest-meta">
+              <div class="dest-rating">
+                <i class="fa-solid fa-star"></i> 4.8
+                <span style="color:var(--clr-text-muted);font-weight:400">(2.4k reviews)</span>
+              </div>
+              <a href="destination.html?dest=Ooty" class="btn btn-primary btn-sm" aria-label="Explore Ooty">
+                Explore <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 2 — Kodaikanal -->
+        <article class="destination-card reveal reveal-delay-1" data-dest="Kodaikanal">
+          <img
+            class="dest-img"
+            src="images/destinations/kodaikanal.jpg"
+            alt="Kodaikanal — Princess of Hill Stations"
+            loading="lazy"
+          />
+          <div class="dest-overlay"></div>
+          <div class="dest-content">
+            <span class="dest-tag">Hill Station</span>
+            <h3>Kodaikanal</h3>
+            <p>The princess of hill stations — pristine lake, pine forests &amp; breathtaking valleys.</p>
+            <div class="dest-meta">
+              <div class="dest-rating"><i class="fa-solid fa-star"></i> 4.7 <span style="color:var(--clr-text-muted);font-weight:400">(1.8k reviews)</span></div>
+              <a href="destination.html?dest=Kodaikanal" class="btn btn-primary btn-sm" aria-label="Explore Kodaikanal">
+                Explore <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 3 — Munnar -->
+        <article class="destination-card reveal reveal-delay-2" data-dest="Munnar">
+          <img
+            class="dest-img"
+            src="images/destinations/munnar.jpg"
+            alt="Munnar — Kerala's Tea Paradise"
+            loading="lazy"
+          />
+          <div class="dest-overlay"></div>
+          <div class="dest-content">
+            <span class="dest-tag">Kerala</span>
+            <h3>Munnar</h3>
+            <p>Endless emerald tea estates, misty peaks &amp; silent morning dew — pure serenity.</p>
+            <div class="dest-meta">
+              <div class="dest-rating"><i class="fa-solid fa-star"></i> 4.9 <span style="color:var(--clr-text-muted);font-weight:400">(3.1k reviews)</span></div>
+              <a href="destination.html?dest=Munnar" class="btn btn-primary btn-sm" aria-label="Explore Munnar">
+                Explore <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 4 — Mysore -->
+        <article class="destination-card reveal" data-dest="Mysore">
+          <img
+            class="dest-img"
+            src="images/destinations/mysore.jpg"
+            alt="Mysore — City of Palaces"
+            loading="lazy"
+          />
+          <div class="dest-overlay"></div>
+          <div class="dest-content">
+            <span class="dest-tag">Heritage</span>
+            <h3>Mysore</h3>
+            <p>The City of Palaces — royal splendour, silk markets &amp; unforgettable Dasara.</p>
+            <div class="dest-meta">
+              <div class="dest-rating"><i class="fa-solid fa-star"></i> 4.6 <span style="color:var(--clr-text-muted);font-weight:400">(2.0k reviews)</span></div>
+              <a href="destination.html?dest=Mysore" class="btn btn-primary btn-sm" aria-label="Explore Mysore">
+                Explore <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 5 — Coimbatore -->
+        <article class="destination-card reveal reveal-delay-1" data-dest="Coimbatore">
+          <img
+            class="dest-img"
+            src="images/destinations/coimbatore.jpg"
+            alt="Coimbatore — Gateway to Nilgiris"
+            loading="lazy"
+          />
+          <div class="dest-overlay"></div>
+          <div class="dest-content">
+            <span class="dest-tag">City &amp; Nature</span>
+            <h3>Coimbatore</h3>
+            <p>Gateway to the Nilgiris — vibrant city culture meeting pristine nature.</p>
+            <div class="dest-meta">
+              <div class="dest-rating"><i class="fa-solid fa-star"></i> 4.4 <span style="color:var(--clr-text-muted);font-weight:400">(1.2k reviews)</span></div>
+              <a href="destination.html?dest=Coimbatore" class="btn btn-primary btn-sm" aria-label="Explore Coimbatore">
+                Explore <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 6 — Chennai -->
+        <article class="destination-card reveal reveal-delay-2" data-dest="Chennai">
+          <img
+            class="dest-img"
+            src="images/destinations/chennai.jpg"
+            alt="Chennai — Cultural Capital of South India"
+            loading="lazy"
+          />
+          <div class="dest-overlay"></div>
+          <div class="dest-content">
+            <span class="dest-tag">Coastal City</span>
+            <h3>Chennai</h3>
+            <p>The cultural capital — Marina Beach, Kapaleeshwarar temple &amp; diverse cuisine.</p>
+            <div class="dest-meta">
+              <div class="dest-rating"><i class="fa-solid fa-star"></i> 4.5 <span style="color:var(--clr-text-muted);font-weight:400">(2.7k reviews)</span></div>
+              <a href="destination.html?dest=Chennai" class="btn btn-primary btn-sm" aria-label="Explore Chennai">
+                Explore <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       HOW IT WORKS
+       ==================================================== -->
+  <section class="section how-section" id="how-it-works" aria-labelledby="how-heading">
+    <div class="container">
+      <div class="features-header">
+        <div class="section-label">Simple Process</div>
+        <h2 class="heading-2" id="how-heading">How Compass Works</h2>
+        <p class="text-muted" style="margin-top:var(--space-4);max-width:460px;margin-inline:auto;">
+          Three easy steps to your perfect, safe, and personalized journey.
+        </p>
+        <div class="divider"></div>
+      </div>
+
+      <div class="steps-grid">
+
+        <div class="step-card reveal">
+          <div class="step-number">1</div>
+          <h3>Enter Travel Details</h3>
+          <p>Tell us your destination, total budget, number of days, and travel style. Our smart engine does the rest.</p>
+        </div>
+
+        <div class="step-card reveal reveal-delay-2">
+          <div class="step-number" style="background: var(--gradient-primary);">2</div>
+          <h3>Get Your Personalized Plan</h3>
+          <p>Receive curated hotels, verified local guides, best routes, hidden gems, and a complete day-wise itinerary.</p>
+        </div>
+
+        <div class="step-card reveal reveal-delay-4">
+          <div class="step-number" style="background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-dark));">3</div>
+          <h3>Travel with Confidence</h3>
+          <p>Live weather updates and a one-tap emergency button keep you informed and safe throughout your journey.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       TESTIMONIALS
+       ==================================================== -->
+  <section class="section testimonials-section" id="testimonials" aria-labelledby="testimonials-heading">
+    <div class="container">
+      <div class="features-header" style="text-align:center;max-width:560px;margin:0 auto var(--space-12);">
+        <div class="section-label">Traveler Stories</div>
+        <h2 class="heading-2" id="testimonials-heading">What Travelers Say</h2>
+        <div class="divider"></div>
+      </div>
+
+      <div class="testimonials-grid">
+
+        <article class="testimonial-card reveal">
+          <div class="testimonial-quote">"</div>
+          <p class="testimonial-text">
+            The day-wise itinerary was spot on! Visited Ooty with my family and we didn't waste a single moment. The local guide recommendation was exceptional — Arun knew every hidden viewpoint.
+          </p>
+          <div class="testimonial-author">
+            <img
+              class="testimonial-avatar"
+              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Priya&backgroundColor=b6e3f4"
+              alt="Priya Ramesh"
+            />
+            <div>
+              <div class="testimonial-name">Priya Ramesh</div>
+              <div class="testimonial-location">📍 Chennai → Ooty</div>
+              <div class="stars" aria-label="5 out of 5 stars">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="testimonial-card reveal reveal-delay-2">
+          <div class="testimonial-quote">"</div>
+          <p class="testimonial-text">
+            The emergency button is a game-changer. We had a small accident on a mountain road and the alert system immediately had our location. The peace of mind alone is worth it.
+          </p>
+          <div class="testimonial-author">
+            <img
+              class="testimonial-avatar"
+              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Karthik&backgroundColor=c0aede"
+              alt="Karthik Nair"
+            />
+            <div>
+              <div class="testimonial-name">Karthik Nair</div>
+              <div class="testimonial-location">📍 Bengaluru → Munnar</div>
+              <div class="stars" aria-label="5 out of 5 stars">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="testimonial-card reveal reveal-delay-4">
+          <div class="testimonial-quote">"</div>
+          <p class="testimonial-text">
+            Planned a solo trip to Kodaikanal on a ₹8000 budget. The platform found me a lovely homestay, a knowledgeable guide, and 5 hidden spots that I'd never have found on my own!
+          </p>
+          <div class="testimonial-author">
+            <img
+              class="testimonial-avatar"
+              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sneha&backgroundColor=ffd5dc"
+              alt="Sneha Patel"
+            />
+            <div>
+              <div class="testimonial-name">Sneha Patel</div>
+              <div class="testimonial-location">📍 Ahmedabad → Kodaikanal</div>
+              <div class="stars" aria-label="5 out of 5 stars">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       CTA BANNER
+       ==================================================== -->
+  <section class="section-sm" aria-label="Call to action">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <div class="section-label" style="justify-content:center;">Start Your Journey</div>
+        <h2>
+          Your Next Adventure<br/>
+          <span class="text-gradient">Starts Right Here</span>
+        </h2>
+        <p>
+          Join thousands of smart travelers who plan safer, smarter, and more memorable journeys with our platform.
+        </p>
+        <div style="display:flex;gap:var(--space-4);justify-content:center;flex-wrap:wrap;">
+          <a href="login.html#register" class="btn btn-primary btn-lg" id="cta-register-btn">
+            <i class="fa-solid fa-rocket"></i>
+            Create Free Account
+          </a>
+          <a href="planner.html" class="btn btn-outline btn-lg" id="cta-planner-btn">
+            <i class="fa-solid fa-map"></i>
+            Start Planning
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       FOOTER
+       ==================================================== -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <div class="nav-logo-icon">🧭</div>
+            <span class="nav-logo-text">Com<span>pass</span></span>
+          </a>
+          <p>
+            India's most complete travel companion — smart planning, verified guides, live weather, and instant emergency assistance for every journey.
+          </p>
+          <div class="footer-social" style="margin-top:var(--space-5);">
+            <a href="#" class="social-link" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="social-link" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" class="social-link" aria-label="Twitter/X"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" class="social-link" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <nav class="footer-links" aria-label="Explore links">
+            <a href="#destinations" class="footer-link">Popular Destinations</a>
+            <a href="planner.html"  class="footer-link">Travel Planner</a>
+            <a href="#"             class="footer-link">Local Guides</a>
+            <a href="#"             class="footer-link">Hidden Gems</a>
+            <a href="weather.html"  class="footer-link">Live Weather</a>
+          </nav>
+        </div>
+
+        <div class="footer-col">
+          <h4>Company</h4>
+          <nav class="footer-links" aria-label="Company links">
+            <a href="#" class="footer-link">About Us</a>
+            <a href="#" class="footer-link">How It Works</a>
+            <a href="#" class="footer-link">Safety Promise</a>
+            <a href="#" class="footer-link">Blog</a>
+            <a href="#" class="footer-link">Contact</a>
+          </nav>
+        </div>
+
+        <div class="footer-col">
+          <h4>Support</h4>
+          <nav class="footer-links" aria-label="Support links">
+            <a href="emergency.html"      class="footer-link">Emergency Help</a>
+            <a href="admin-dashboard.html" class="footer-link">Admin Dashboard</a>
+            <a href="#"                   class="footer-link">Privacy Policy</a>
+            <a href="#"                   class="footer-link">Terms of Service</a>
+            <a href="#"                   class="footer-link">FAQ</a>
+          </nav>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2024 Compass. Built for safer, smarter travel across India.</p>
+        <p style="color:var(--clr-primary);font-weight:600;">
+          <i class="fa-solid fa-shield-halved"></i> Emergency: Dial 112
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script src="js/home.js"></script>
+</body>
+</html>

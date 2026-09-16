@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sign in or create an account with Compass — Your trusted travel companion across India." />
+  <title>Login, Register & Restore Password with OTP — Compass</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    .not-found-prompt {
+      display: none;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      margin-top: var(--space-4);
+      animation: fade-in-up 0.3s ease;
+    }
+    .not-found-prompt p {
+      font-size: var(--text-sm);
+      color: #fbbf24;
+      margin-bottom: var(--space-3);
+      line-height: 1.5;
+    }
+    .recent-user-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--clr-accent);
+      font-size: 11px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    .recent-user-tag:hover {
+      background: rgba(16, 185, 129, 0.3);
+    }
+
+    /* OTP Verification Banner & Input Styles */
+    .otp-dispatch-card {
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      margin-bottom: var(--space-5);
+      animation: fade-in-up 0.3s ease;
+    }
+    .otp-code-pill {
+      display: inline-block;
+      letter-spacing: 4px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #38bdf8;
+      background: var(--clr-surface-2);
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--clr-primary);
+      margin: 4px 0;
+      font-family: monospace;
+    }
+    .otp-input-field {
+      letter-spacing: 6px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      text-align: center;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-page">
+
+    <!-- Left Visual Panel -->
+    <div class="auth-visual">
+      <div class="auth-visual-bg"></div>
+      <div class="auth-visual-overlay"></div>
+
+      <a href="index.html" class="nav-logo auth-visual-logo">
+        <div class="nav-logo-icon">🧭</div>
+        <span class="nav-logo-text">Com<span>pass</span></span>
+      </a>
+
+      <div class="auth-visual-content">
+        <h2 class="auth-tagline">
+          Travel smarter,<br/>
+          explore deeper,<br/>
+          stay <em>safer.</em>
+        </h2>
+        <p class="auth-sub">
+          Join thousands of travelers experiencing curated itineraries, verified local guides, real-time safety alerts, and live weather.
+        </p>
+
+        <div class="auth-features">
+          <div class="auth-feature-item">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span>AI-powered personalized itineraries</span>
+          </div>
+          <div class="auth-feature-item">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>One-tap SOS emergency system with GPS</span>
+          </div>
+          <div class="auth-feature-item">
+            <i class="fa-solid fa-cloud-sun"></i>
+            <span>Real-time weather tracking & smart packing tips</span>
+          </div>
+          <div class="auth-feature-item">
+            <i class="fa-solid fa-gem"></i>
+            <span>Curated hidden gems & verified local guides</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Auth Panel -->
+    <div class="auth-panel">
+      <div class="auth-panel-inner">
+
+        <!-- Top back button -->
+        <div style="margin-bottom: var(--space-6);">
+          <a href="index.html" class="nav-link" style="display:inline-flex;align-items:center;gap:var(--space-2);padding:0;font-size:var(--text-sm);">
+            <i class="fa-solid fa-arrow-left"></i> Back to Home
+          </a>
+        </div>
+
+        <!-- Tab switcher (Visible for Login & Register) -->
+        <div class="auth-tabs" id="auth-tabs-bar" role="tablist">
+          <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" aria-controls="login-form-container">
+            Sign In
+          </button>
+          <button class="auth-tab" id="tab-register" role="tab" aria-selected="false" aria-controls="register-form-container">
+            Create Account
+          </button>
+        </div>
+
+        <!-- Quick Demo Credentials & Registered Accounts Box -->
+        <div id="quick-accounts-box" style="background:var(--clr-surface);border:1px dashed var(--clr-primary);border-radius:var(--radius-md);padding:var(--space-3);margin-bottom:var(--space-6);font-size:var(--text-xs);color:var(--clr-text-muted);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <strong style="color:var(--clr-primary-light);"><i class="fa-solid fa-key"></i> Quick Fill Accounts:</strong>
+          </div>
+          <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center;" id="quick-accounts-list">
+            <button type="button" id="fill-traveler" class="btn btn-outline btn-sm" style="padding:4px 10px;font-size:11px;">
+              Traveler Demo
+            </button>
+            <button type="button" id="fill-admin" class="btn btn-outline btn-sm" style="padding:4px 10px;font-size:11px;">
+              Admin Demo
+            </button>
+          </div>
+        </div>
+
+        <!-- ================= 1. LOGIN FORM ================= -->
+        <div class="auth-form-container active" id="login-form-container" role="tabpanel" aria-labelledby="tab-login">
+          <h1 class="auth-heading">Welcome Back</h1>
+          <p class="auth-subheading">Enter your email and password to access your travel portal.</p>
+
+          <form class="auth-form" id="login-form" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="login-email">Email Address</label>
+              <div class="input-icon-wrapper" style="position:relative;">
+                <input
+                  type="email"
+                  id="login-email"
+                  name="email"
+                  class="form-input"
+                  placeholder="name@example.com"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+              <span class="form-error" id="login-email-error"></span>
+            </div>
+
+            <div class="form-group">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-1);">
+                <label class="form-label" for="login-password" style="margin-bottom:0;">Password</label>
+                <a href="#restore" class="auth-forgot" id="forgot-link">Forgot password? Restore via OTP</a>
+              </div>
+              <div class="password-wrapper">
+                <input
+                  type="password"
+                  id="login-password"
+                  name="password"
+                  class="form-input"
+                  placeholder="••••••••"
+                  autocomplete="current-password"
+                  required
+                />
+                <button type="button" class="password-toggle" data-target="login-password" aria-label="Toggle password visibility">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+              <span class="form-error" id="login-password-error"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-auth" id="login-submit-btn">
+              <span class="btn-text">Sign In <i class="fa-solid fa-arrow-right" style="margin-left:6px;"></i></span>
+              <span class="btn-spinner"></span>
+            </button>
+
+            <!-- Smart prompt if user is not found -->
+            <div class="not-found-prompt" id="not-found-box">
+              <p id="not-found-text">
+                <i class="fa-solid fa-circle-question"></i> No account found for this email. Since you are a new user, please create an account to get started.
+              </p>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-switch-with-creds" style="width:100%; border-color:var(--clr-warning); color:var(--clr-warning);">
+                <i class="fa-solid fa-user-plus"></i> Create Account Now with this Email
+              </button>
+            </div>
+          </form>
+
+          <p class="auth-switch">
+            Don't have an account?
+            <span class="auth-switch-link" id="switch-to-register">Sign up now</span>
+          </p>
+        </div>
+
+        <!-- ================= 2. REGISTER FORM ================= -->
+        <div class="auth-form-container" id="register-form-container" role="tabpanel" aria-labelledby="tab-register">
+          <h1 class="auth-heading">Create Account</h1>
+          <p class="auth-subheading">Start planning smarter and safer adventures today.</p>
+
+          <form class="auth-form" id="register-form" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="reg-name">Full Name</label>
+              <input
+                type="text"
+                id="reg-name"
+                name="fullName"
+                class="form-input"
+                placeholder="Rahul Sharma"
+                autocomplete="name"
+                required
+              />
+              <span class="form-error" id="reg-name-error"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-email">Email Address</label>
+              <input
+                type="email"
+                id="reg-email"
+                name="email"
+                class="form-input"
+                placeholder="rahul@example.com"
+                autocomplete="email"
+                required
+              />
+              <span class="form-error" id="reg-email-error"></span>
+            </div>
+
+            <div class="form-form-row auth-form-row">
+              <div class="form-group">
+                <label class="form-label" for="reg-phone">Phone Number</label>
+                <input
+                  type="tel"
+                  id="reg-phone"
+                  name="phone"
+                  class="form-input"
+                  placeholder="9876543210"
+                  autocomplete="tel"
+                  required
+                />
+                <span class="form-error" id="reg-phone-error"></span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="reg-role">Role</label>
+                <select id="reg-role" name="role" class="form-input" style="background:var(--clr-surface);">
+                  <option value="ROLE_USER">Traveler</option>
+                  <option value="ROLE_ADMIN">Admin</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-password">Password</label>
+              <div class="password-wrapper">
+                <input
+                  type="password"
+                  id="reg-password"
+                  name="password"
+                  class="form-input"
+                  placeholder="Min. 8 chars"
+                  autocomplete="new-password"
+                  required
+                />
+                <button type="button" class="password-toggle" data-target="reg-password" aria-label="Toggle password visibility">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+              <div class="strength-meter">
+                <div class="strength-bar" id="str-1"></div>
+                <div class="strength-bar" id="str-2"></div>
+                <div class="strength-bar" id="str-3"></div>
+              </div>
+              <div class="strength-label" id="strength-label">Password strength: Min. 8 characters</div>
+              <span class="form-error" id="reg-password-error"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-confirm-password">Confirm Password</label>
+              <div class="password-wrapper">
+                <input
+                  type="password"
+                  id="reg-confirm-password"
+                  name="confirmPassword"
+                  class="form-input"
+                  placeholder="Re-enter your password"
+                  autocomplete="new-password"
+                  required
+                />
+                <button type="button" class="password-toggle" data-target="reg-confirm-password" aria-label="Toggle password visibility">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+              <span class="form-error" id="reg-confirm-error"></span>
+            </div>
+
+            <p class="auth-terms">
+              By creating an account, you agree to our
+              <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+            </p>
+
+            <button type="submit" class="btn btn-primary btn-auth" id="reg-submit-btn">
+              <span class="btn-text">Create Account <i class="fa-solid fa-user-plus" style="margin-left:6px;"></i></span>
+              <span class="btn-spinner"></span>
+            </button>
+          </form>
+
+          <p class="auth-switch">
+            Already have an account?
+            <span class="auth-switch-link" id="switch-to-login">Sign in</span>
+          </p>
+        </div>
+
+        <!-- ================= 3. RESTORE PASSWORD WITH OTP VERIFICATION ================= -->
+        <div class="auth-form-container" id="forgot-form-container" role="tabpanel">
+          <div style="margin-bottom:var(--space-4);">
+            <button type="button" id="btn-back-from-forgot" class="nav-link" style="padding:0; background:none; border:none; cursor:pointer; font-size:var(--text-sm); display:inline-flex; align-items:center; gap:6px;">
+              <i class="fa-solid fa-arrow-left"></i> Back to Sign In
+            </button>
+          </div>
+
+          <h1 class="auth-heading">Restore Password</h1>
+          <p class="auth-subheading" id="restore-step-desc">Enter your registered email address to receive a secure OTP code.</p>
+
+          <!-- STAGE 1: ENTER EMAIL & SEND OTP -->
+          <div id="otp-stage-1">
+            <div class="form-group" style="margin-bottom:var(--space-5);">
+              <label class="form-label" for="reset-email">Registered Email Address</label>
+              <input
+                type="email"
+                id="reset-email"
+                name="email"
+                class="form-input"
+                placeholder="name@example.com"
+                autocomplete="email"
+                required
+              />
+              <span class="form-error" id="reset-email-error"></span>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-auth" id="btn-send-otp">
+              <span class="btn-text"><i class="fa-solid fa-paper-plane" style="margin-right:6px;"></i> Send OTP to Email</span>
+              <span class="btn-spinner"></span>
+            </button>
+          </div>
+
+          <!-- STAGE 2: ENTER OTP & NEW PASSWORD -->
+          <form class="auth-form" id="otp-stage-2" style="display:none;" novalidate>
+            
+            <!-- Simulated email dispatch card -->
+            <div class="otp-dispatch-card">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                <span style="font-size:12px; color:var(--clr-text-muted);">
+                  <i class="fa-solid fa-envelope-circle-check" style="color:var(--clr-primary-light);"></i> Email dispatched to <strong id="dispatched-email-label" style="color:#fff;">user@example.com</strong>
+                </span>
+                <span style="font-size:11px; color:#fbbf24;">Valid 5 mins</span>
+              </div>
+              <div style="font-size:12px; margin-top:6px;">
+                Verification OTP: <span class="otp-code-pill" id="generated-otp-display">------</span>
+                <button type="button" id="btn-autofill-otp" class="btn btn-outline btn-sm" style="padding:2px 8px; font-size:10px; margin-left:6px;">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-fill Code
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label class="form-label" for="reset-otp-input">Enter 6-Digit OTP</label>
+                <button type="button" id="btn-resend-otp" style="background:none; border:none; color:var(--clr-primary-light); font-size:11px; cursor:pointer;">
+                  Resend OTP
+                </button>
+              </div>
+              <input
+                type="text"
+                id="reset-otp-input"
+                class="form-input otp-input-field"
+                placeholder="••••••"
+                maxlength="6"
+                required
+              />
+              <span class="form-error" id="reset-otp-error"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reset-new-password">New Password</label>
+              <div class="password-wrapper">
+                <input
+                  type="password"
+                  id="reset-new-password"
+                  name="newPassword"
+                  class="form-input"
+                  placeholder="Min. 8 characters"
+                  autocomplete="new-password"
+                  required
+                />
+                <button type="button" class="password-toggle" data-target="reset-new-password" aria-label="Toggle password visibility">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reset-confirm-password">Confirm New Password</label>
+              <div class="password-wrapper">
+                <input
+                  type="password"
+                  id="reset-confirm-password"
+                  name="confirmPassword"
+                  class="form-input"
+                  placeholder="Re-enter new password"
+                  autocomplete="new-password"
+                  required
+                />
+                <button type="button" class="password-toggle" data-target="reset-confirm-password" aria-label="Toggle password visibility">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+              <span class="form-error" id="reset-password-error"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-auth" id="reset-submit-btn">
+              <span class="btn-text"><i class="fa-solid fa-shield-halved" style="margin-right:6px;"></i> Verify OTP & Set New Password</span>
+              <span class="btn-spinner"></span>
+            </button>
+          </form>
+
+          <p class="auth-switch">
+            Remembered your password?
+            <span class="auth-switch-link" id="switch-to-login-from-forgot">Back to sign in</span>
+          </p>
+        </div>
+
+        <!-- ================= 4. SUCCESS CARD ================= -->
+        <div class="auth-success" id="auth-success-card">
+          <div class="auth-success-icon">
+            <i class="fa-solid fa-check" style="color:var(--clr-accent);"></i>
+          </div>
+          <h2 class="auth-heading" id="success-title">Account Ready!</h2>
+          <p class="auth-subheading" id="success-desc">Welcome aboard! Your account is ready.</p>
+
+          <div style="display:flex; flex-direction:column; gap:var(--space-3); max-width:320px; margin:var(--space-4) auto 0;">
+            <button type="button" class="btn btn-primary" id="btn-proceed-dashboard">
+              Continue to Portal <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button type="button" class="btn btn-outline" id="btn-goto-signin">
+              Sign In with My New Account
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script>
+    // Local Registry Helper to persist accounts across sessions
+    const UserStore = {
+      KEY: 'st_registered_users',
+
+      getAll() {
+        try {
+          const stored = localStorage.getItem(this.KEY);
+          return stored ? JSON.parse(stored) : {};
+        } catch {
+          return {};
+        }
+      },
+
+      saveUser(user) {
+        const users = this.getAll();
+        users[user.email.toLowerCase().trim()] = user;
+        localStorage.setItem(this.KEY, JSON.stringify(users));
+      },
+
+      findUser(email) {
+        const users = this.getAll();
+        return users[email.toLowerCase().trim()] || null;
+      },
+
+      updatePassword(email, newPassword) {
+        const users = this.getAll();
+        const key = email.toLowerCase().trim();
+        if (users[key]) {
+          users[key].password = newPassword;
+          localStorage.setItem(this.KEY, JSON.stringify(users));
+          return true;
+        }
+        return false;
+      }
+    };
+
+    // Ensure default demo accounts are in the local store
+    if (!UserStore.findUser('traveler@smarttourism.com')) {
+      UserStore.saveUser({
+        fullName: 'Demo Traveler',
+        email: 'traveler@smarttourism.com',
+        phone: '9876543210',
+        password: 'Travel@123',
+        role: 'ROLE_USER'
+      });
+    }
+    if (!UserStore.findUser('admin@smarttourism.com')) {
+      UserStore.saveUser({
+        fullName: 'Platform Admin',
+        email: 'admin@smarttourism.com',
+        phone: '9876500000',
+        password: 'Admin@123',
+        role: 'ROLE_ADMIN'
+      });
+    }
+
+    // Active OTP state in memory
+    let activeOtp = {
+      code: null,
+      email: null,
+      expiresAt: null
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabLogin = document.getElementById('tab-login');
+      const tabRegister = document.getElementById('tab-register');
+      const authTabsBar = document.getElementById('auth-tabs-bar');
+      const loginContainer = document.getElementById('login-form-container');
+      const registerContainer = document.getElementById('register-form-container');
+      const forgotContainer = document.getElementById('forgot-form-container');
+      const switchToRegister = document.getElementById('switch-to-register');
+      const switchToLogin = document.getElementById('switch-to-login');
+      const switchToLoginFromForgot = document.getElementById('switch-to-login-from-forgot');
+      const btnBackFromForgot = document.getElementById('btn-back-from-forgot');
+      const authSuccess = document.getElementById('auth-success-card');
+      const notFoundBox = document.getElementById('not-found-box');
+      const notFoundText = document.getElementById('not-found-text');
+      const btnSwitchWithCreds = document.getElementById('btn-switch-with-creds');
+      const forgotLink = document.getElementById('forgot-link');
+
+      // OTP stage elements
+      const otpStage1 = document.getElementById('otp-stage-1');
+      const otpStage2 = document.getElementById('otp-stage-2');
+      const btnSendOtp = document.getElementById('btn-send-otp');
+      const btnResendOtp = document.getElementById('btn-resend-otp');
+      const btnAutofillOtp = document.getElementById('btn-autofill-otp');
+      const restoreStepDesc = document.getElementById('restore-step-desc');
+      const dispatchedEmailLabel = document.getElementById('dispatched-email-label');
+      const generatedOtpDisplay = document.getElementById('generated-otp-display');
+
+      function showLogin() {
+        authTabsBar.style.display = 'flex';
+        tabLogin.classList.add('active');
+        tabLogin.setAttribute('aria-selected', 'true');
+        tabRegister.classList.remove('active');
+        tabRegister.setAttribute('aria-selected', 'false');
+        loginContainer.classList.add('active');
+        registerContainer.classList.remove('active');
+        forgotContainer.classList.remove('active');
+        authSuccess.style.display = 'none';
+        window.location.hash = '';
+      }
+
+      function showRegister() {
+        authTabsBar.style.display = 'flex';
+        tabRegister.classList.add('active');
+        tabRegister.setAttribute('aria-selected', 'true');
+        tabLogin.classList.remove('active');
+        tabLogin.setAttribute('aria-selected', 'false');
+        registerContainer.classList.add('active');
+        loginContainer.classList.remove('active');
+        forgotContainer.classList.remove('active');
+        authSuccess.style.display = 'none';
+        notFoundBox.style.display = 'none';
+        window.location.hash = 'register';
+      }
+
+      function showForgot() {
+        authTabsBar.style.display = 'none';
+        forgotContainer.classList.add('active');
+        loginContainer.classList.remove('active');
+        registerContainer.classList.remove('active');
+        authSuccess.style.display = 'none';
+        notFoundBox.style.display = 'none';
+        window.location.hash = 'restore';
+
+        // Reset to Stage 1
+        otpStage1.style.display = 'block';
+        otpStage2.style.display = 'none';
+        restoreStepDesc.textContent = 'Enter your registered email address to receive a secure OTP code.';
+        document.getElementById('reset-email-error').textContent = '';
+
+        // Pre-fill email from login form if entered
+        const enteredEmail = document.getElementById('login-email').value.trim();
+        if (enteredEmail) {
+          document.getElementById('reset-email').value = enteredEmail;
+        }
+        document.getElementById('reset-email').focus();
+      }
+
+      tabLogin.addEventListener('click', showLogin);
+      tabRegister.addEventListener('click', showRegister);
+      if (switchToRegister) switchToRegister.addEventListener('click', showRegister);
+      if (switchToLogin) switchToLogin.addEventListener('click', showLogin);
+      if (forgotLink) forgotLink.addEventListener('click', (e) => { e.preventDefault(); showForgot(); });
+      if (btnBackFromForgot) btnBackFromForgot.addEventListener('click', showLogin);
+      if (switchToLoginFromForgot) switchToLoginFromForgot.addEventListener('click', showLogin);
+
+      // Render quick account pills
+      function refreshQuickAccounts() {
+        const container = document.getElementById('quick-accounts-list');
+        const users = UserStore.getAll();
+        const customUsers = Object.values(users).filter(u => 
+          u.email !== 'traveler@smarttourism.com' && u.email !== 'admin@smarttourism.com'
+        );
+
+        // Remove previous custom pills
+        container.querySelectorAll('.recent-user-tag').forEach(el => el.remove());
+
+        // Add each registered user as a quick fill tag
+        customUsers.forEach(u => {
+          const pill = document.createElement('button');
+          pill.type = 'button';
+          pill.className = 'recent-user-tag';
+          pill.title = `Fill ${u.email}`;
+          pill.innerHTML = `<i class="fa-solid fa-user"></i> ${u.fullName.split(' ')[0]} (${u.email})`;
+          pill.addEventListener('click', () => {
+            showLogin();
+            document.getElementById('login-email').value = u.email;
+            document.getElementById('login-password').value = u.password;
+            Toast.info(`Filled credentials for ${u.fullName}`);
+          });
+          container.appendChild(pill);
+        });
+      }
+
+      refreshQuickAccounts();
+
+      // Check initial hash
+      if (window.location.hash === '#register') {
+        showRegister();
+      } else if (window.location.hash === '#restore') {
+        showForgot();
+      }
+
+      // Quick Fill Demo Credentials
+      document.getElementById('fill-traveler').addEventListener('click', () => {
+        showLogin();
+        const u = UserStore.findUser('traveler@smarttourism.com');
+        document.getElementById('login-email').value = 'traveler@smarttourism.com';
+        document.getElementById('login-password').value = u ? u.password : 'Travel@123';
+        notFoundBox.style.display = 'none';
+        Toast.info('Filled Traveler demo credentials');
+      });
+
+      document.getElementById('fill-admin').addEventListener('click', () => {
+        showLogin();
+        const u = UserStore.findUser('admin@smarttourism.com');
+        document.getElementById('login-email').value = 'admin@smarttourism.com';
+        document.getElementById('login-password').value = u ? u.password : 'Admin@123';
+        notFoundBox.style.display = 'none';
+        Toast.info('Filled Admin demo credentials');
+      });
+
+      // Password visibility toggle
+      document.querySelectorAll('.password-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-target');
+          const input = document.getElementById(targetId);
+          if (!input) return;
+          const isPassword = input.type === 'password';
+          input.type = isPassword ? 'text' : 'password';
+          btn.innerHTML = isPassword ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
+        });
+      });
+
+      // Password strength meter for register
+      const regPass = document.getElementById('reg-password');
+      const str1 = document.getElementById('str-1');
+      const str2 = document.getElementById('str-2');
+      const str3 = document.getElementById('str-3');
+      const strLabel = document.getElementById('strength-label');
+
+      regPass.addEventListener('input', () => {
+        const val = regPass.value;
+        let score = 0;
+        if (val.length >= 8) score++;
+        if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+        if (/\d/.test(val) || /[^A-Za-z0-9]/.test(val)) score++;
+
+        str1.className = 'strength-bar';
+        str2.className = 'strength-bar';
+        str3.className = 'strength-bar';
+
+        if (score === 1) {
+          str1.classList.add('weak');
+          strLabel.textContent = 'Password strength: Weak';
+          strLabel.style.color = 'var(--clr-danger)';
+        } else if (score === 2) {
+          str1.classList.add('medium');
+          str2.classList.add('medium');
+          strLabel.textContent = 'Password strength: Medium';
+          strLabel.style.color = 'var(--clr-warning)';
+        } else if (score === 3) {
+          str1.classList.add('strong');
+          str2.classList.add('strong');
+          str3.classList.add('strong');
+          strLabel.textContent = 'Password strength: Strong';
+          strLabel.style.color = 'var(--clr-accent)';
+        } else {
+          strLabel.textContent = 'Password strength: Min. 8 characters';
+          strLabel.style.color = 'var(--clr-text-faint)';
+        }
+      });
+
+      // Switch to Register pre-filled with entered email & password
+      btnSwitchWithCreds.addEventListener('click', () => {
+        const email = document.getElementById('login-email').value.trim();
+        const pass = document.getElementById('login-password').value;
+        showRegister();
+        if (email) document.getElementById('reg-email').value = email;
+        if (pass) {
+          document.getElementById('reg-password').value = pass;
+          document.getElementById('reg-confirm-password').value = pass;
+        }
+        document.getElementById('reg-name').focus();
+        Toast.info('Pre-filled your email. Please enter your name to complete registration.');
+      });
+
+      // ================= 1. HANDLE LOGIN =================
+      const loginForm = document.getElementById('login-form');
+      const loginBtn = document.getElementById('login-submit-btn');
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        notFoundBox.style.display = 'none';
+
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        if (!email || !password) {
+          Toast.error('Please enter both email and password.');
+          return;
+        }
+
+        loginBtn.classList.add('btn-loading');
+
+        try {
+          let user = null;
+          let token = null;
+
+          // Try Backend API first if available
+          try {
+            const apiResult = await ApiClient.post('/auth/login', { email, password });
+            if (apiResult && apiResult.token) {
+              token = apiResult.token;
+              user = {
+                id: apiResult.userId || apiResult.id,
+                email: apiResult.email,
+                fullName: apiResult.fullName,
+                role: apiResult.role
+              };
+            }
+          } catch (apiErr) {
+            console.warn('Backend API login check:', apiErr.message);
+          }
+
+          // If backend didn't authenticate, check local persistent user store
+          if (!user) {
+            const localUser = UserStore.findUser(email);
+
+            if (localUser) {
+              // User exists! Check password
+              if (localUser.password === password) {
+                token = 'jwt_token_' + Date.now();
+                user = {
+                  id: localUser.id || Date.now(),
+                  email: localUser.email,
+                  fullName: localUser.fullName,
+                  role: localUser.role || 'ROLE_USER'
+                };
+              } else {
+                Toast.error('Incorrect password. Click "Forgot password? Restore via OTP" to reset it.');
+                document.getElementById('login-password-error').innerHTML = `Incorrect password. <a href="#restore" onclick="document.getElementById('forgot-link').click(); return false;" style="color:var(--clr-primary-light); text-decoration:underline;">Restore via OTP</a>`;
+                loginBtn.classList.remove('btn-loading');
+                return;
+              }
+            } else {
+              // User NOT found! Since this is a new user, prompt them to create an account
+              notFoundBox.style.display = 'block';
+              notFoundText.innerHTML = `<strong><i class="fa-solid fa-triangle-exclamation"></i> Account not found for "${email}".</strong><br/>You are a new user — click below to create your account in 30 seconds!`;
+              Toast.warning('New user detected. Please create an account to proceed.');
+              loginBtn.classList.remove('btn-loading');
+              return;
+            }
+          }
+
+          // Successful login!
+          localStorage.setItem('st_token', token);
+          localStorage.setItem('st_user', JSON.stringify(user));
+
+          loginContainer.classList.remove('active');
+          authSuccess.style.display = 'block';
+          document.getElementById('success-title').textContent = `Welcome back, ${user.fullName}!`;
+          document.getElementById('success-desc').textContent = 'Signed in successfully. Redirecting you...';
+          document.getElementById('btn-goto-signin').style.display = 'none';
+
+          const savedRedirect = sessionStorage.getItem('st_redirect_after_login');
+          sessionStorage.removeItem('st_redirect_after_login');
+          const redirectUrl = savedRedirect || (user.role === 'ROLE_ADMIN' ? 'admin-dashboard.html' : 'index.html');
+          document.getElementById('btn-proceed-dashboard').onclick = () => window.location.href = redirectUrl;
+
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 1200);
+
+        } catch (err) {
+          Toast.error(err.message || 'Login failed.');
+        } finally {
+          loginBtn.classList.remove('btn-loading');
+        }
+      });
+
+      // ================= 2. HANDLE REGISTRATION =================
+      const registerForm = document.getElementById('register-form');
+      const regBtn = document.getElementById('reg-submit-btn');
+
+      registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const role = document.getElementById('reg-role').value;
+        const password = document.getElementById('reg-password').value;
+        const confirmPassword = document.getElementById('reg-confirm-password').value;
+
+        if (!fullName || !email || !password) {
+          Toast.error('Please complete all required fields.');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          Toast.error('Passwords do not match. Please re-enter.');
+          document.getElementById('reg-confirm-error').textContent = 'Passwords do not match';
+          return;
+        } else {
+          document.getElementById('reg-confirm-error').textContent = '';
+        }
+
+        regBtn.classList.add('btn-loading');
+
+        try {
+          // Check if already registered
+          if (UserStore.findUser(email)) {
+            Toast.warning('An account with this email already exists. Switching to Sign In.');
+            showLogin();
+            document.getElementById('login-email').value = email;
+            regBtn.classList.remove('btn-loading');
+            return;
+          }
+
+          // Try Backend registration API
+          try {
+            await ApiClient.post('/auth/register', {
+              fullName,
+              email,
+              phone: phone || '9999999999',
+              password,
+              confirmPassword,
+              role
+            });
+          } catch (apiErr) {
+            console.log('Saved to client store (offline/standalone mode)');
+          }
+
+          // Save into local persistent UserStore
+          const newUser = {
+            id: Date.now(),
+            fullName,
+            email,
+            phone,
+            password,
+            role
+          };
+          UserStore.saveUser(newUser);
+
+          // Auto-authenticate
+          const token = 'jwt_token_' + Date.now();
+          localStorage.setItem('st_token', token);
+          localStorage.setItem('st_user', JSON.stringify({
+            id: newUser.id,
+            email: newUser.email,
+            fullName: newUser.fullName,
+            role: newUser.role
+          }));
+
+          refreshQuickAccounts();
+
+          registerContainer.classList.remove('active');
+          authSuccess.style.display = 'block';
+          document.getElementById('success-title').textContent = 'Account Created Successfully!';
+          document.getElementById('success-desc').textContent = `Welcome ${fullName}! Your account (${email}) is active and ready.`;
+
+          const savedRedirect = sessionStorage.getItem('st_redirect_after_login');
+          sessionStorage.removeItem('st_redirect_after_login');
+          const destUrl = savedRedirect || (role === 'ROLE_ADMIN' ? 'admin-dashboard.html' : 'planner.html');
+          
+          document.getElementById('btn-proceed-dashboard').onclick = () => {
+            window.location.href = destUrl;
+          };
+
+          const gotoSignInBtn = document.getElementById('btn-goto-signin');
+          gotoSignInBtn.style.display = 'block';
+          gotoSignInBtn.onclick = () => {
+            showLogin();
+            document.getElementById('login-email').value = email;
+            document.getElementById('login-password').value = password;
+            Toast.info('Credentials filled! You can now click Sign In to test logging in.');
+          };
+
+          Toast.success('Account created successfully!');
+
+          // Automatic redirect timer
+          setTimeout(() => {
+            if (authSuccess.style.display === 'block') {
+              window.location.href = destUrl;
+            }
+          }, 3500);
+
+        } catch (err) {
+          Toast.error(err.message || 'Registration failed.');
+        } finally {
+          regBtn.classList.remove('btn-loading');
+        }
+      });
+
+      // ================= 3. HANDLE FORGOT / RESTORE WITH OTP =================
+
+      // Function to generate and dispatch OTP
+      function sendOtpCode(email) {
+        const generatedCode = String(Math.floor(100000 + Math.random() * 900000));
+        activeOtp = {
+          code: generatedCode,
+          email: email.toLowerCase().trim(),
+          expiresAt: Date.now() + (5 * 60 * 1000) // 5 minutes
+        };
+
+        dispatchedEmailLabel.textContent = email;
+        generatedOtpDisplay.textContent = generatedCode;
+
+        // Transition from Stage 1 to Stage 2
+        otpStage1.style.display = 'none';
+        otpStage2.style.display = 'block';
+        restoreStepDesc.textContent = 'Enter the 6-digit OTP code sent to your email and set your new password.';
+        document.getElementById('reset-otp-input').value = '';
+        document.getElementById('reset-otp-error').textContent = '';
+        document.getElementById('reset-new-password').value = '';
+        document.getElementById('reset-confirm-password').value = '';
+        document.getElementById('reset-otp-input').focus();
+
+        Toast.success(`Verification code sent to ${email}`);
+      }
+
+      // Send OTP Button click
+      btnSendOtp.addEventListener('click', () => {
+        const email = document.getElementById('reset-email').value.trim();
+        const errSpan = document.getElementById('reset-email-error');
+        errSpan.textContent = '';
+
+        if (!email) {
+          errSpan.textContent = 'Please enter your registered email address.';
+          Toast.error('Please enter your registered email address.');
+          return;
+        }
+
+        btnSendOtp.classList.add('btn-loading');
+
+        setTimeout(() => {
+          btnSendOtp.classList.remove('btn-loading');
+
+          const user = UserStore.findUser(email);
+          if (!user) {
+            errSpan.textContent = `No account found for "${email}". Please verify or create an account.`;
+            Toast.error(`No account found for "${email}".`);
+            return;
+          }
+
+          sendOtpCode(email);
+        }, 500);
+      });
+
+      // Resend OTP Button click
+      btnResendOtp.addEventListener('click', () => {
+        if (activeOtp.email) {
+          sendOtpCode(activeOtp.email);
+          Toast.info('New OTP code generated & sent to your email.');
+        }
+      });
+
+      // Quick 1-click Auto-fill OTP button for testing ease
+      btnAutofillOtp.addEventListener('click', () => {
+        if (activeOtp.code) {
+          document.getElementById('reset-otp-input').value = activeOtp.code;
+          document.getElementById('reset-new-password').focus();
+          Toast.info('OTP automatically populated!');
+        }
+      });
+
+      // Handle Step 2: Verify OTP & Submit New Password
+      otpStage2.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const enteredOtp = document.getElementById('reset-otp-input').value.trim();
+        const newPassword = document.getElementById('reset-new-password').value;
+        const confirmPassword = document.getElementById('reset-confirm-password').value;
+        const otpError = document.getElementById('reset-otp-error');
+        const passError = document.getElementById('reset-password-error');
+        const submitBtn = document.getElementById('reset-submit-btn');
+
+        otpError.textContent = '';
+        passError.textContent = '';
+
+        // 1. Verify OTP presence & expiry
+        if (!enteredOtp) {
+          otpError.textContent = 'Please enter the 6-digit OTP code.';
+          Toast.error('Please enter the OTP code.');
+          return;
+        }
+
+        if (Date.now() > activeOtp.expiresAt) {
+          otpError.textContent = 'OTP code has expired. Please click "Resend OTP".';
+          Toast.error('OTP has expired. Please click Resend OTP.');
+          return;
+        }
+
+        if (enteredOtp !== activeOtp.code) {
+          otpError.textContent = 'Invalid OTP code. Please check the code and try again.';
+          Toast.error('Invalid OTP code. Please verify.');
+          return;
+        }
+
+        // 2. Verify Passwords
+        if (!newPassword || newPassword.length < 8) {
+          passError.textContent = 'Password must be at least 8 characters.';
+          Toast.error('Password must be at least 8 characters.');
+          return;
+        }
+
+        if (newPassword !== confirmPassword) {
+          passError.textContent = 'Passwords do not match.';
+          Toast.error('Passwords do not match. Please re-enter.');
+          return;
+        }
+
+        submitBtn.classList.add('btn-loading');
+
+        setTimeout(() => {
+          submitBtn.classList.remove('btn-loading');
+
+          const email = activeOtp.email;
+          UserStore.updatePassword(email, newPassword);
+          refreshQuickAccounts();
+
+          Toast.success(`OTP verified & password restored for ${email}!`);
+
+          // Switch back to Login and fill the new credentials
+          showLogin();
+          document.getElementById('login-email').value = email;
+          document.getElementById('login-password').value = newPassword;
+          document.getElementById('login-password-error').textContent = '';
+
+          alert(`✅ Password Restored Successfully via OTP!\n\nYour new password for ${email} has been verified and saved.\n\nYour credentials have been pre-filled on the Sign In page. Click 'Sign In' to access your account.`);
+        }, 600);
+      });
+    });
+  </script>
+</body>
+</html>

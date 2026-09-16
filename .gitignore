@@ -1,0 +1,40 @@
+# ============================================================
+# Smart Tourism Platform — .gitignore
+# ============================================================
+
+# --- Environment / Secrets ---
+.env
+*.env
+application-local.properties
+application-prod.properties
+
+# --- Java / Maven ---
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.logs
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# --- IDE ---
+.idea/
+*.iml
+.eclipse
+.project
+.settings/
+*.launch
+.vscode/
+*.code-workspace
+
+# --- Node / Frontend tooling (if added later) ---
+node_modules/
+dist/
+.npm
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini

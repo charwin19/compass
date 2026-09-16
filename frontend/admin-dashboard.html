@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Administration Console — Hierarchical portal for User monitoring & editing and Local Guide verification." />
+  <title>Admin Portal — Compass</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Instant Auth & Role Guard -->
+  <script>
+    if (!localStorage.getItem('st_token')) {
+      sessionStorage.setItem('st_redirect_after_login', window.location.href);
+      alert('🔒 Access Restricted: Please sign in as an Admin to access this dashboard.');
+      window.location.href = 'login.html';
+    } else {
+      try {
+        const u = JSON.parse(localStorage.getItem('st_user') || '{}');
+        if (u.role !== 'ROLE_ADMIN') {
+          alert('⛔ Access Denied: Admin privileges required to view this portal.');
+          window.location.href = 'index.html';
+        }
+      } catch(e) {}
+    }
+  </script>
+
+  <style>
+    .admin-hero {
+      padding: calc(var(--nav-height) + var(--space-6)) 0 var(--space-4);
+      background: var(--gradient-hero);
+      border-bottom: 1px solid var(--clr-border);
+    }
+    .hierarchy-nav-card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border-light);
+      border-radius: var(--radius-xl);
+      padding: var(--space-4) var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-6);
+      box-shadow: var(--shadow-sm);
+    }
+    .hierarchy-crumbs {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: var(--text-sm);
+      color: var(--clr-text-muted);
+      flex-wrap: wrap;
+    }
+    .hierarchy-crumb-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      transition: var(--transition-fast);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .hierarchy-crumb-item.parent {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .hierarchy-crumb-item.child1 {
+      background: rgba(14, 165, 233, 0.15);
+      color: var(--clr-primary-light);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+    .hierarchy-crumb-item.child2 {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    .stat-card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      position: relative;
+    }
+    .stat-card .val {
+      font-size: var(--text-3xl);
+      font-weight: 800;
+      font-family: var(--font-heading);
+      margin: 4px 0;
+    }
+    .admin-tabs-bar {
+      display: flex;
+      gap: var(--space-2);
+      border-bottom: 1px solid var(--clr-border);
+      margin-bottom: var(--space-6);
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .admin-tab-btn {
+      padding: var(--space-3) var(--space-5);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--clr-text-muted);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: var(--transition-fast);
+    }
+    .admin-tab-btn:hover {
+      color: #fff;
+    }
+    .admin-tab-btn.active {
+      color: var(--clr-primary-light);
+      border-bottom-color: var(--clr-primary);
+    }
+    .admin-table-container {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+      margin-bottom: var(--space-8);
+      box-shadow: var(--shadow-sm);
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: var(--text-sm);
+    }
+    .admin-table th {
+      background: var(--clr-surface-2);
+      padding: var(--space-4);
+      color: var(--clr-text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--clr-border);
+      white-space: nowrap;
+    }
+    .admin-table td {
+      padding: var(--space-4);
+      border-bottom: 1px solid var(--clr-border);
+      vertical-align: middle;
+    }
+    .admin-table tr:hover td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .status-badge.verified   { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
+    .status-badge.pending    { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
+    .status-badge.active     { background: rgba(14,165,233,0.2); color: var(--clr-primary-light); border: 1px solid rgba(14,165,233,0.4); }
+    .status-badge.suspended  { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+
+    /* Guide Cards Grid */
+    .guides-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--space-5);
+      margin-bottom: var(--space-12);
+    }
+    .guide-admin-card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: var(--transition-base);
+    }
+    .guide-admin-card:hover {
+      border-color: var(--clr-border-light);
+      box-shadow: var(--shadow-md);
+    }
+    .guide-admin-header {
+      display: flex;
+      gap: var(--space-3);
+      align-items: center;
+      margin-bottom: var(--space-4);
+    }
+    .guide-admin-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--clr-primary);
+      flex-shrink: 0;
+    }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: var(--glass-blur);
+      z-index: 2000;
+      display: none;
+      place-items: center;
+      padding: var(--space-4);
+      animation: fade-in 0.2s ease;
+    }
+    .modal-overlay.open {
+      display: grid;
+    }
+    .modal-content {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border-light);
+      border-radius: var(--radius-xl);
+      max-width: 580px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: var(--space-6);
+      box-shadow: var(--shadow-lg);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <a href="index.html" class="nav-logo" aria-label="Compass Home">
+        <div class="nav-logo-icon">🧭</div>
+        <span class="nav-logo-text">Com<span>pass</span></span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="index.html#destinations" class="nav-link">Explore</a></li>
+        <li><a href="planner.html" class="nav-link">Travel Planner</a></li>
+        <li><a href="weather.html" class="nav-link">Weather</a></li>
+        <li><a href="emergency.html" class="nav-link">Emergency</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="login.html" class="btn btn-outline btn-sm" id="nav-login-btn">Login</a>
+        <a href="login.html#register" class="btn btn-primary btn-sm" id="nav-register-btn">Get Started</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle mobile menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile nav -->
+  <div class="mobile-nav" id="mobile-nav" role="menu">
+    <a href="index.html" class="nav-link" role="menuitem">Home</a>
+    <a href="index.html#destinations" class="nav-link" role="menuitem">Explore</a>
+    <a href="planner.html" class="nav-link" role="menuitem">Travel Planner</a>
+    <a href="weather.html" class="nav-link" role="menuitem">Weather</a>
+    <a href="emergency.html" class="nav-link" role="menuitem">Emergency</a>
+    <div style="display:flex;gap:var(--space-3);margin-top:var(--space-2);">
+      <a href="login.html" class="btn btn-outline btn-sm" style="flex:1">Login</a>
+      <a href="login.html#register" class="btn btn-primary btn-sm" style="flex:1">Register</a>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="admin-hero">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:var(--space-4);">
+        <div>
+          <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 12px; border-radius:var(--radius-full); font-size:11px; font-weight:700; background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); margin-bottom:var(--space-2);">
+            <i class="fa-solid fa-sitemap"></i> Master Management Console
+          </div>
+          <h1 style="font-size:clamp(var(--text-2xl), 3.5vw, var(--text-3xl)); margin:0; color:#fff;">
+            Platform Administration & Hierarchy
+          </h1>
+          <p style="color:var(--clr-text-muted); font-size:var(--text-sm); margin-top:4px;">
+            Hierarchical Governance: <strong>Admin (Parent)</strong> ➔ <strong>User Monitoring & Editing (Child 1)</strong> ➔ <strong>Guide Verification (Child 2)</strong>.
+          </p>
+        </div>
+
+        <div style="display:flex; gap:var(--space-2); flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="refreshAdminData()">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh Telemetry
+          </button>
+          <a href="profile.html" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-user"></i> My Admin Profile
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="margin-top:var(--space-6);">
+
+    <!-- Hierarchical Relationship Navigation Bar -->
+    <div class="hierarchy-nav-card">
+      <div>
+        <div style="font-size:11px; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">
+          Active Administrative Path
+        </div>
+        <div class="hierarchy-crumbs">
+          <span class="hierarchy-crumb-item parent" onclick="switchAdminTab('overview')">
+            <i class="fa-solid fa-crown"></i> Admin (Parent)
+          </span>
+          <i class="fa-solid fa-chevron-right" style="font-size:10px; color:var(--clr-text-faint);"></i>
+          <span class="hierarchy-crumb-item child1" onclick="switchAdminTab('users')">
+            <i class="fa-solid fa-users"></i> Child 1: Users
+          </span>
+          <i class="fa-solid fa-chevron-right" style="font-size:10px; color:var(--clr-text-faint);"></i>
+          <span class="hierarchy-crumb-item child2" onclick="switchAdminTab('guides')">
+            <i class="fa-solid fa-user-shield"></i> Child 2: Guides
+          </span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:var(--space-2); flex-wrap:wrap;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="openAddUserModal()" style="font-size:12px;">
+          <i class="fa-solid fa-user-plus"></i> New Traveler (Child 1)
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="openAddGuideModal()" style="font-size:12px;">
+          <i class="fa-solid fa-plus"></i> New Guide (Child 2)
+        </button>
+      </div>
+    </div>
+
+    <!-- Telemetry Metric Cards -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div style="font-size:12px; color:var(--clr-text-muted);"><i class="fa-solid fa-users" style="color:var(--clr-primary-light);"></i> Total Registered Travelers</div>
+        <div class="val" id="stat-total-users" style="color:var(--clr-primary-light);">5</div>
+        <div style="font-size:11px; color:var(--clr-text-muted);" id="stat-active-users-sub">5 Active accounts</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:12px; color:var(--clr-text-muted);"><i class="fa-solid fa-user-check" style="color:#34d399;"></i> Verified Local Guides</div>
+        <div class="val" id="stat-verified-guides" style="color:#34d399;">7</div>
+        <div style="font-size:11px; color:#34d399;" id="stat-verified-sub">Active & Bookable</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:12px; color:var(--clr-text-muted);"><i class="fa-solid fa-hourglass-half" style="color:#fbbf24;"></i> Pending Guide Verifications</div>
+        <div class="val" id="stat-pending-guides" style="color:#fbbf24;">3</div>
+        <div style="font-size:11px; color:#fbbf24;">Requires administrative audit</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:12px; color:var(--clr-text-muted);"><i class="fa-solid fa-triangle-exclamation" style="color:var(--clr-danger);"></i> Active Emergency Alerts</div>
+        <div class="val" id="stat-active-alerts" style="color:var(--clr-danger);">2</div>
+        <div style="font-size:11px; color:#f87171;">Live response dispatch queue</div>
+      </div>
+    </div>
+
+    <!-- Administrative Navigation Tabs -->
+    <div class="admin-tabs-bar" role="tablist">
+      <button class="admin-tab-btn active" id="tab-overview" onclick="switchAdminTab('overview')">
+        <i class="fa-solid fa-chart-pie"></i> Parent Overview
+      </button>
+      <button class="admin-tab-btn" id="tab-users" onclick="switchAdminTab('users')">
+        <i class="fa-solid fa-users"></i> Child 1: User Management (<span id="tab-users-count">5</span>)
+      </button>
+      <button class="admin-tab-btn" id="tab-guides" onclick="switchAdminTab('guides')">
+        <i class="fa-solid fa-user-shield"></i> Child 2: Guides & Verification (<span id="tab-guides-count">10</span>)
+      </button>
+      <button class="admin-tab-btn" id="tab-alerts" onclick="switchAdminTab('alerts')">
+        <i class="fa-solid fa-truck-medical"></i> Safety Alerts Dispatch
+      </button>
+    </div>
+
+    <!-- ==============================================================
+         VIEW 1: PARENT OVERVIEW
+         ============================================================== -->
+    <section id="view-overview">
+      <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:var(--space-6); margin-bottom:var(--space-8);">
+        
+        <!-- Destination Readiness Breakdown -->
+        <div class="stat-card">
+          <h3 style="font-size:var(--text-lg); color:#fff; margin-bottom:var(--space-4); display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-map-location-dot" style="color:var(--clr-primary-light);"></i> Destination Safety & Guide Readiness
+          </h3>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:var(--space-3);">
+            <div style="background:var(--clr-surface-2); padding:var(--space-3); border-radius:var(--radius-md); border-left:3px solid var(--clr-primary);">
+              <strong style="color:#fff;">Ooty, TN</strong>
+              <div style="font-size:11px; color:var(--clr-text-muted); margin-top:2px;">2 Verified Guides • 4 Patrols</div>
+            </div>
+            <div style="background:var(--clr-surface-2); padding:var(--space-3); border-radius:var(--radius-md); border-left:3px solid var(--clr-accent);">
+              <strong style="color:#fff;">Kodaikanal, TN</strong>
+              <div style="font-size:11px; color:var(--clr-text-muted); margin-top:2px;">1 Verified, 1 Pending • 3 Patrols</div>
+            </div>
+            <div style="background:var(--clr-surface-2); padding:var(--space-3); border-radius:var(--radius-md); border-left:3px solid #10b981;">
+              <strong style="color:#fff;">Munnar, KL</strong>
+              <div style="font-size:11px; color:var(--clr-text-muted); margin-top:2px;">1 Verified, 1 Pending • 5 Patrols</div>
+            </div>
+            <div style="background:var(--clr-surface-2); padding:var(--space-3); border-radius:var(--radius-md); border-left:3px solid #a855f7;">
+              <strong style="color:#fff;">Mysore, KA</strong>
+              <div style="font-size:11px; color:var(--clr-text-muted); margin-top:2px;">2 Verified Guides • 6 Patrols</div>
+            </div>
+            <div style="background:var(--clr-surface-2); padding:var(--space-3); border-radius:var(--radius-md); border-left:3px solid #f59e0b;">
+              <strong style="color:#fff;">Coimbatore, TN</strong>
+              <div style="font-size:11px; color:var(--clr-text-muted); margin-top:2px;">1 Pending Guide • 4 Patrols</div>
+            </div>
+            <div style="background:var(--clr-surface-2); padding:var(--space-3); border-radius:var(--radius-md); border-left:3px solid #ec4899;">
+              <strong style="color:#fff;">Chennai, TN</strong>
+              <div style="font-size:11px; color:var(--clr-text-muted); margin-top:2px;">1 Verified Guide • 8 Patrols</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Jump & Management Shortcuts -->
+        <div class="stat-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <h3 style="font-size:var(--text-lg); color:#fff; margin-bottom:var(--space-3); display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-bolt" style="color:#fbbf24;"></i> Quick Actions
+            </h3>
+            <p style="font-size:var(--text-xs); color:var(--clr-text-muted); margin-bottom:var(--space-4);">
+              Direct shortcuts to manage Child 1 (User accounts) and Child 2 (Guide verification).
+            </p>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:var(--space-2);">
+            <button class="btn btn-outline btn-sm" onclick="switchAdminTab('users')" style="justify-content:flex-start; gap:8px;">
+              <i class="fa-solid fa-users" style="color:var(--clr-primary-light);"></i> View & Edit Registered Users
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="switchAdminTab('guides'); filterGuidesStatus('PENDING');" style="justify-content:flex-start; gap:8px; border-color:rgba(245,158,11,0.3); color:#fbbf24;">
+              <i class="fa-solid fa-user-clock"></i> Review 3 Pending Guide Verifications
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="switchAdminTab('alerts')" style="justify-content:flex-start; gap:8px; border-color:rgba(239,68,68,0.3); color:#f87171;">
+              <i class="fa-solid fa-truck-medical"></i> Inspect Active Emergency Alerts
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==============================================================
+         VIEW 2: CHILD 1 — USER MANAGEMENT
+         ============================================================== -->
+    <section id="view-users" style="display:none;">
+      
+      <!-- Filter and Action Bar -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-3); margin-bottom:var(--space-4);">
+        <div>
+          <h2 style="font-size:var(--text-xl); color:#fff; margin:0 0 2px;">
+            <i class="fa-solid fa-users" style="color:var(--clr-primary-light);"></i> Child 1: Registered Users & Traveler Profiles
+          </h2>
+          <p style="font-size:var(--text-xs); color:var(--clr-text-muted); margin:0;">
+            Monitor all user accounts, check their last travel status (or null), and update profile details.
+          </p>
+        </div>
+
+        <div style="display:flex; gap:var(--space-2); flex-wrap:wrap;">
+          <input type="text" id="input-search-users" class="form-input" placeholder="Search by name, email, city..." style="width:240px; padding:6px 12px; font-size:12px;" />
+          <select id="select-filter-role" class="form-input" style="width:140px; padding:6px 10px; font-size:12px; background:var(--clr-surface-2);">
+            <option value="ALL">All Roles</option>
+            <option value="ROLE_USER">Travelers (User)</option>
+            <option value="ROLE_ADMIN">Administrators</option>
+          </select>
+          <button type="button" class="btn btn-primary btn-sm" onclick="openAddUserModal()">
+            <i class="fa-solid fa-user-plus"></i> Add User
+          </button>
+        </div>
+      </div>
+
+      <!-- Users Table -->
+      <div class="admin-table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Traveler</th>
+              <th>Contact & Base</th>
+              <th>Travel Style</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Last Travel Journey</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- ==============================================================
+         VIEW 3: CHILD 2 — GUIDES MANAGEMENT & VERIFICATION
+         ============================================================== -->
+    <section id="view-guides" style="display:none;">
+      
+      <!-- Filter and Action Bar -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-3); margin-bottom:var(--space-4);">
+        <div>
+          <h2 style="font-size:var(--text-xl); color:#fff; margin:0 0 2px;">
+            <i class="fa-solid fa-user-shield" style="color:#34d399;"></i> Child 2: Local Guides & Verification Desk
+          </h2>
+          <p style="font-size:var(--text-xs); color:var(--clr-text-muted); margin:0;">
+            Review guide credentials, experience, daily fee, and verify local experts to keep travelers safe.
+          </p>
+        </div>
+
+        <div style="display:flex; gap:var(--space-2); flex-wrap:wrap;">
+          <select id="select-guide-dest" class="form-input" style="width:160px; padding:6px 10px; font-size:12px; background:var(--clr-surface-2);" onchange="renderGuidesList()">
+            <option value="ALL">All Destinations</option>
+            <option value="Ooty">Ooty, TN</option>
+            <option value="Kodaikanal">Kodaikanal, TN</option>
+            <option value="Munnar">Munnar, KL</option>
+            <option value="Mysore">Mysore, KA</option>
+            <option value="Coimbatore">Coimbatore, TN</option>
+            <option value="Chennai">Chennai, TN</option>
+          </select>
+          <select id="select-guide-status" class="form-input" style="width:160px; padding:6px 10px; font-size:12px; background:var(--clr-surface-2);" onchange="renderGuidesList()">
+            <option value="ALL">All Statuses</option>
+            <option value="VERIFIED">Verified Guides</option>
+            <option value="PENDING">Pending Verification</option>
+          </select>
+          <button type="button" class="btn btn-primary btn-sm" onclick="openAddGuideModal()">
+            <i class="fa-solid fa-plus"></i> Add Guide
+          </button>
+        </div>
+      </div>
+
+      <!-- Guides Cards Grid -->
+      <div class="guides-grid" id="guides-grid-container">
+        <!-- Rendered by JS -->
+      </div>
+
+    </section>
+
+    <!-- ==============================================================
+         VIEW 4: SAFETY & ALERTS DISPATCH
+         ============================================================== -->
+    <section id="view-alerts" style="display:none;">
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-4); flex-wrap:wrap; gap:var(--space-2);">
+        <div>
+          <h2 style="font-size:var(--text-xl); color:#fff; margin:0 0 2px;">
+            <i class="fa-solid fa-tower-broadcast" style="color:var(--clr-danger);"></i> Live Emergency Dispatch Queue
+          </h2>
+          <p style="font-size:var(--text-xs); color:var(--clr-text-muted); margin:0;">
+            Immediate responder routing for travelers in distress.
+          </p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="renderAlertsTable(); Toast.info('Alerts queue refreshed.');">
+          <i class="fa-solid fa-rotate"></i> Refresh Alerts
+        </button>
+      </div>
+
+      <div class="admin-table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Traveler</th>
+              <th>Type / Severity</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Logged At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="alerts-tbody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================= EDIT USER MODAL (CHILD 1) ================= -->
+  <div class="modal-overlay" id="modal-edit-user" role="dialog" aria-modal="true" aria-labelledby="modal-edit-user-title">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-4); border-bottom:1px solid var(--clr-border); padding-bottom:var(--space-3);">
+        <h3 id="modal-edit-user-title" style="font-size:var(--text-lg); color:#fff; margin:0;">
+          <i class="fa-solid fa-user-pen" style="color:var(--clr-primary-light);"></i> Admin: Edit User Details
+        </h3>
+        <button type="button" onclick="closeEditUserModal()" style="background:none; border:none; color:var(--clr-text-muted); font-size:1.4rem; cursor:pointer;">✕</button>
+      </div>
+
+      <form id="form-edit-user">
+        <input type="hidden" id="edit-user-original-email" />
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="edit-user-fullname" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="edit-user-email" class="form-input" readonly style="opacity:0.7; cursor:not-allowed;" title="Email cannot be changed" />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="text" id="edit-user-phone" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Home City / Base</label>
+            <input type="text" id="edit-user-city" class="form-input" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Travel Style</label>
+            <select id="edit-user-style" class="form-input" style="background:var(--clr-surface-2);">
+              <option value="Moderate Explorer">Moderate Explorer</option>
+              <option value="Luxury / Premium">Luxury / Premium</option>
+              <option value="Budget / Backpacker">Budget / Backpacker</option>
+              <option value="Adventure & Trekking">Adventure & Trekking</option>
+              <option value="Family Vacations">Family Vacations</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Emergency Contact</label>
+            <input type="text" id="edit-user-emergency" class="form-input" />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Role</label>
+            <select id="edit-user-role" class="form-input" style="background:var(--clr-surface-2);">
+              <option value="ROLE_USER">Traveler (ROLE_USER)</option>
+              <option value="ROLE_ADMIN">Administrator (ROLE_ADMIN)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select id="edit-user-status" class="form-input" style="background:var(--clr-surface-2);">
+              <option value="ACTIVE">ACTIVE</option>
+              <option value="SUSPENDED">SUSPENDED</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-3);">
+          <label class="form-label">Last Travel Destination</label>
+          <input type="text" id="edit-user-lasttravel" class="form-input" placeholder="e.g. Munnar (Aug 2024) or leave empty for null" />
+          <small style="color:var(--clr-text-faint); font-size:11px;">Leave empty to test/set the user's last travel to null</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-5);">
+          <label class="form-label">Traveler Bio / Motto</label>
+          <textarea id="edit-user-bio" class="form-input" rows="2"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:var(--space-3);">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closeEditUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-floppy-disk"></i> Update Traveler Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= ADD USER MODAL (CHILD 1) ================= -->
+  <div class="modal-overlay" id="modal-add-user" role="dialog" aria-modal="true" aria-labelledby="modal-add-user-title">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-4); border-bottom:1px solid var(--clr-border); padding-bottom:var(--space-3);">
+        <h3 id="modal-add-user-title" style="font-size:var(--text-lg); color:#fff; margin:0;">
+          <i class="fa-solid fa-user-plus" style="color:var(--clr-primary-light);"></i> Register New Traveler (Child 1)
+        </h3>
+        <button type="button" onclick="closeAddUserModal()" style="background:none; border:none; color:var(--clr-text-muted); font-size:1.4rem; cursor:pointer;">✕</button>
+      </div>
+
+      <form id="form-add-user">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="add-user-fullname" class="form-input" placeholder="e.g. Ramesh Kumar" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="add-user-email" class="form-input" placeholder="traveler@example.com" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="text" id="add-user-phone" class="form-input" placeholder="+91 98765 00000" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Home City</label>
+            <input type="text" id="add-user-city" class="form-input" placeholder="e.g. Bengaluru" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-4);">
+          <div class="form-group">
+            <label class="form-label">Role</label>
+            <select id="add-user-role" class="form-input" style="background:var(--clr-surface-2);">
+              <option value="ROLE_USER">Traveler (ROLE_USER)</option>
+              <option value="ROLE_ADMIN">Administrator (ROLE_ADMIN)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Initial Travel History</label>
+            <input type="text" id="add-user-lasttravel" class="form-input" placeholder="Leave empty for null" />
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:var(--space-3);">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closeAddUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-check"></i> Register User
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= EDIT GUIDE MODAL (CHILD 2) ================= -->
+  <div class="modal-overlay" id="modal-edit-guide" role="dialog" aria-modal="true" aria-labelledby="modal-edit-guide-title">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-4); border-bottom:1px solid var(--clr-border); padding-bottom:var(--space-3);">
+        <h3 id="modal-edit-guide-title" style="font-size:var(--text-lg); color:#fff; margin:0;">
+          <i class="fa-solid fa-user-pen" style="color:#34d399;"></i> Edit Guide Details (Child 2)
+        </h3>
+        <button type="button" onclick="closeEditGuideModal()" style="background:none; border:none; color:var(--clr-text-muted); font-size:1.4rem; cursor:pointer;">✕</button>
+      </div>
+
+      <form id="form-edit-guide">
+        <input type="hidden" id="edit-guide-id" />
+
+        <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Guide Full Name</label>
+            <input type="text" id="edit-guide-name" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Destination</label>
+            <select id="edit-guide-dest" class="form-input" style="background:var(--clr-surface-2);">
+              <option value="Ooty">Ooty</option>
+              <option value="Kodaikanal">Kodaikanal</option>
+              <option value="Munnar">Munnar</option>
+              <option value="Mysore">Mysore</option>
+              <option value="Coimbatore">Coimbatore</option>
+              <option value="Chennai">Chennai</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Experience (Years)</label>
+            <input type="number" id="edit-guide-exp" class="form-input" min="1" max="40" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Daily Fee (INR)</label>
+            <input type="text" id="edit-guide-fee" class="form-input" placeholder="e.g. ₹1,200/day" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Languages Spoken</label>
+            <input type="text" id="edit-guide-lang" class="form-input" placeholder="e.g. Tamil, English, Hindi" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Phone</label>
+            <input type="text" id="edit-guide-phone" class="form-input" placeholder="+91 94432 00000" required />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-3);">
+          <label class="form-label">Specialization / Core Expertise</label>
+          <input type="text" id="edit-guide-spec" class="form-input" placeholder="e.g. High Altitude Treks & Tea Estates" required />
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-5);">
+          <label class="form-label">Guide Bio / Summary</label>
+          <textarea id="edit-guide-bio" class="form-input" rows="2" required></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:var(--space-3);">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closeEditGuideModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-floppy-disk"></i> Save Guide Information
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= ADD GUIDE MODAL (CHILD 2) ================= -->
+  <div class="modal-overlay" id="modal-add-guide" role="dialog" aria-modal="true" aria-labelledby="modal-add-guide-title">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-4); border-bottom:1px solid var(--clr-border); padding-bottom:var(--space-3);">
+        <h3 id="modal-add-guide-title" style="font-size:var(--text-lg); color:#fff; margin:0;">
+          <i class="fa-solid fa-plus" style="color:#34d399;"></i> Onboard New Local Guide (Child 2)
+        </h3>
+        <button type="button" onclick="closeAddGuideModal()" style="background:none; border:none; color:var(--clr-text-muted); font-size:1.4rem; cursor:pointer;">✕</button>
+      </div>
+
+      <form id="form-add-guide">
+        <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Guide Full Name</label>
+            <input type="text" id="add-guide-name" class="form-input" placeholder="e.g. Selvam Murugan" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Destination</label>
+            <select id="add-guide-dest" class="form-input" style="background:var(--clr-surface-2);">
+              <option value="Ooty">Ooty</option>
+              <option value="Kodaikanal">Kodaikanal</option>
+              <option value="Munnar">Munnar</option>
+              <option value="Mysore">Mysore</option>
+              <option value="Coimbatore">Coimbatore</option>
+              <option value="Chennai">Chennai</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Experience (Years)</label>
+            <input type="number" id="add-guide-exp" class="form-input" value="4" min="1" max="40" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Daily Fee (INR)</label>
+            <input type="text" id="add-guide-fee" class="form-input" placeholder="e.g. ₹1,200/day" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label">Languages Spoken</label>
+            <input type="text" id="add-guide-lang" class="form-input" placeholder="e.g. Tamil, English" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Phone</label>
+            <input type="text" id="add-guide-phone" class="form-input" placeholder="+91 94432 11223" required />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-3);">
+          <label class="form-label">Specialization</label>
+          <input type="text" id="add-guide-spec" class="form-input" placeholder="e.g. Waterfall Treks, Tea Estates" required />
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-4);">
+          <label class="form-label">Initial Verification Status</label>
+          <select id="add-guide-verified" class="form-input" style="background:var(--clr-surface-2);">
+            <option value="true">Verified (Grant Green Badge Immediately)</option>
+            <option value="false">Pending Verification (Audit Required)</option>
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:var(--space-3);">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closeAddGuideModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-check"></i> Onboard Guide
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <div class="nav-logo-icon">🧭</div>
+            <span class="nav-logo-text">Com<span>pass</span></span>
+          </a>
+          <p>India's most complete travel companion — smart planning, verified guides, live weather, and instant emergency assistance for every journey.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <nav class="footer-links">
+            <a href="index.html#destinations" class="footer-link">Popular Destinations</a>
+            <a href="planner.html" class="footer-link">Travel Planner</a>
+            <a href="weather.html" class="footer-link">Live Weather</a>
+          </nav>
+        </div>
+        <div class="footer-col">
+          <h4>Support & Admin</h4>
+          <nav class="footer-links">
+            <a href="emergency.html" class="footer-link">Emergency Help</a>
+            <a href="admin-dashboard.html" class="footer-link">Admin Dashboard</a>
+            <a href="profile.html" class="footer-link">Traveler Profile</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 Compass. Built for safer, smarter travel across India.</p>
+        <p style="color:var(--clr-primary);font-weight:600;"><i class="fa-solid fa-shield-halved"></i> Emergency: Dial 112</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script>
+    // Live Alerts Data
+    let ALERTS_DATA = [
+      { id: 'ALT-1082', traveler: 'Rahul Sharma', phone: '+91 98765 43210', type: 'MEDICAL', severity: 'HIGH', loc: 'Doddabetta Peak Trail, Ooty', status: 'PENDING', time: '12 mins ago' },
+      { id: 'ALT-1081', traveler: 'Priya N.', phone: '+91 94432 99881', type: 'LOST', severity: 'MEDIUM', loc: 'Pine Forest, Kodaikanal', status: 'IN_PROGRESS', time: '34 mins ago' },
+      { id: 'ALT-1080', traveler: 'Amit Patel', phone: '+91 98201 11223', type: 'ACCIDENT', severity: 'CRITICAL', loc: 'Mattupetty Road, Munnar', status: 'RESOLVED', time: '2 hours ago' },
+      { id: 'ALT-1079', traveler: 'Sunita Rao', phone: '+91 97412 33445', type: 'POLICE', severity: 'LOW', loc: 'Devaraja Market, Mysore', status: 'RESOLVED', time: '4 hours ago' }
+    ];
+
+    // 1. Navigation & Tab Switching
+    function switchAdminTab(tabName) {
+      document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('main > section').forEach(sec => sec.style.display = 'none');
+
+      const targetBtn = document.getElementById(`tab-${tabName}`);
+      const targetView = document.getElementById(`view-${tabName}`);
+
+      if (targetBtn) targetBtn.classList.add('active');
+      if (targetView) targetView.style.display = 'block';
+
+      if (tabName === 'users') renderUsersTable();
+      if (tabName === 'guides') renderGuidesList();
+      if (tabName === 'alerts') renderAlertsTable();
+    }
+
+    // 2. Refresh Metric Counters across Parent, Child 1, Child 2
+    function refreshMetrics() {
+      const users = AdminUserStore.getAllUsers();
+      const guides = GuidesStore.getAll();
+      const activeAlerts = ALERTS_DATA.filter(a => a.status !== 'RESOLVED').length;
+
+      const verifiedGuidesCount = guides.filter(g => g.isVerified).length;
+      const pendingGuidesCount = guides.filter(g => !g.isVerified).length;
+
+      document.getElementById('stat-total-users').textContent = users.length;
+      document.getElementById('stat-active-users-sub').textContent = `${users.filter(u => u.status === 'ACTIVE').length} Active accounts`;
+      document.getElementById('tab-users-count').textContent = users.length;
+
+      document.getElementById('stat-verified-guides').textContent = verifiedGuidesCount;
+      document.getElementById('stat-pending-guides').textContent = pendingGuidesCount;
+      document.getElementById('tab-guides-count').textContent = guides.length;
+
+      document.getElementById('stat-active-alerts').textContent = activeAlerts;
+    }
+
+    function refreshAdminData() {
+      refreshMetrics();
+      renderUsersTable();
+      renderGuidesList();
+      renderAlertsTable();
+      Toast.success('Admin telemetry refreshed successfully!');
+    }
+
+    // ==============================================================
+    // CHILD 1: USER MANAGEMENT LOGIC
+    // ==============================================================
+    function renderUsersTable() {
+      const tbody = document.getElementById('users-tbody');
+      if (!tbody) return;
+
+      const search = (document.getElementById('input-search-users')?.value || '').toLowerCase().trim();
+      const roleFilter = document.getElementById('select-filter-role')?.value || 'ALL';
+
+      let users = AdminUserStore.getAllUsers();
+
+      if (roleFilter !== 'ALL') {
+        users = users.filter(u => u.role === roleFilter);
+      }
+
+      if (search) {
+        users = users.filter(u => 
+          (u.fullName || '').toLowerCase().includes(search) ||
+          (u.email || '').toLowerCase().includes(search) ||
+          (u.homeCity || '').toLowerCase().includes(search) ||
+          (u.phone || '').toLowerCase().includes(search)
+        );
+      }
+
+      tbody.innerHTML = '';
+
+      if (!users.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center; padding:var(--space-8); color:var(--clr-text-muted);">
+              No travelers found matching your criteria.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      users.forEach(user => {
+        const isImageAvatar = user.avatar && (user.avatar.startsWith('http') || user.avatar.startsWith('data:image'));
+        const avatarHtml = isImageAvatar
+          ? `<img src="${user.avatar}" alt="${user.fullName}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid var(--clr-primary);" />`
+          : `<div style="width:36px; height:36px; border-radius:50%; background:var(--clr-surface-2); display:flex; align-items:center; justify-content:center; font-size:18px; border:1px solid var(--clr-border);">${user.avatar || '🧭'}</div>`;
+
+        // Explicit null check for Last Travel!
+        let lastTravelHtml = '';
+        if (user.lastTravel) {
+          lastTravelHtml = `
+            <div style="font-weight:600; color:#fff;">📍 ${user.lastTravel}</div>
+            <div style="font-size:11px; color:var(--clr-text-muted);">Recorded Journey</div>
+          `;
+        } else {
+          lastTravelHtml = `
+            <span class="badge-pill" style="background:rgba(239, 68, 68, 0.15); color:#fca5a5; border-color:rgba(239, 68, 68, 0.3);">
+              <i class="fa-solid fa-ban"></i> null (None Yet)
+            </span>
+          `;
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div style="display:flex; align-items:center; gap:var(--space-3);">
+              ${avatarHtml}
+              <div>
+                <strong style="color:#fff; display:block;">${user.fullName}</strong>
+                <span style="font-size:11px; color:var(--clr-text-muted);">Member since ${user.joinedDate || '2024'}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="color:var(--clr-text); font-weight:500;">${user.email}</div>
+            <div style="font-size:11px; color:var(--clr-text-muted);"><i class="fa-solid fa-phone" style="font-size:9px;"></i> ${user.phone || '—'} • ${user.homeCity || '—'}</div>
+          </td>
+          <td>
+            <span class="badge-pill" style="font-size:11px; background:rgba(14,165,233,0.12); color:var(--clr-primary-light);">
+              ${user.travelStyle || 'Moderate Explorer'}
+            </span>
+          </td>
+          <td>
+            <span style="font-size:11px; font-weight:700; color:${user.role === 'ROLE_ADMIN' ? '#c084fc' : 'var(--clr-text-muted)'};">
+              ${user.role === 'ROLE_ADMIN' ? '🛡️ ADMIN' : '👤 USER'}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge ${user.status === 'ACTIVE' ? 'active' : 'suspended'}">
+              ${user.status || 'ACTIVE'}
+            </span>
+          </td>
+          <td>
+            ${lastTravelHtml}
+          </td>
+          <td>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-outline btn-sm" onclick="openEditUserModal('${user.email}')" style="padding:4px 8px; font-size:11px;" title="Edit details">
+                <i class="fa-solid fa-user-pen"></i> Edit
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="toggleUserStatus('${user.email}')" style="padding:4px 8px; font-size:11px; color:#fbbf24; border-color:rgba(245,158,11,0.3);" title="Toggle active/suspended">
+                <i class="fa-solid fa-power-off"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function toggleUserStatus(email) {
+      const user = AdminUserStore.getUserByEmail(email);
+      if (!user) return;
+      const newStatus = user.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+      AdminUserStore.updateUser(email, { status: newStatus });
+      renderUsersTable();
+      refreshMetrics();
+      Toast.info(`User ${user.fullName} marked as ${newStatus}`);
+    }
+
+    // Edit User Modal Handlers
+    function openEditUserModal(email) {
+      const user = AdminUserStore.getUserByEmail(email);
+      if (!user) return;
+
+      document.getElementById('edit-user-original-email').value = user.email;
+      document.getElementById('edit-user-fullname').value = user.fullName || '';
+      document.getElementById('edit-user-email').value = user.email || '';
+      document.getElementById('edit-user-phone').value = user.phone || '';
+      document.getElementById('edit-user-city').value = user.homeCity || '';
+      document.getElementById('edit-user-style').value = user.travelStyle || 'Moderate Explorer';
+      document.getElementById('edit-user-emergency').value = user.emergencyContact || '';
+      document.getElementById('edit-user-role').value = user.role || 'ROLE_USER';
+      document.getElementById('edit-user-status').value = user.status || 'ACTIVE';
+      document.getElementById('edit-user-lasttravel').value = user.lastTravel || '';
+      document.getElementById('edit-user-bio').value = user.bio || '';
+
+      document.getElementById('modal-edit-user').classList.add('open');
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('modal-edit-user').classList.remove('open');
+    }
+
+    document.getElementById('form-edit-user')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('edit-user-original-email').value;
+      const fullName = document.getElementById('edit-user-fullname').value.trim();
+      const phone = document.getElementById('edit-user-phone').value.trim();
+      const homeCity = document.getElementById('edit-user-city').value.trim();
+      const travelStyle = document.getElementById('edit-user-style').value;
+      const emergencyContact = document.getElementById('edit-user-emergency').value.trim();
+      const role = document.getElementById('edit-user-role').value;
+      const status = document.getElementById('edit-user-status').value;
+      const lastTravelInput = document.getElementById('edit-user-lasttravel').value.trim();
+      const bio = document.getElementById('edit-user-bio').value.trim();
+
+      const lastTravel = lastTravelInput ? lastTravelInput : null; // converts empty string to null
+
+      AdminUserStore.updateUser(email, {
+        fullName, phone, homeCity, travelStyle, emergencyContact, role, status, lastTravel, bio
+      });
+
+      renderUsersTable();
+      refreshMetrics();
+      closeEditUserModal();
+      Toast.success(`User details for ${fullName} updated successfully!`);
+    });
+
+    // Add User Modal Handlers
+    function openAddUserModal() {
+      document.getElementById('form-add-user')?.reset();
+      document.getElementById('modal-add-user').classList.add('open');
+    }
+
+    function closeAddUserModal() {
+      document.getElementById('modal-add-user').classList.remove('open');
+    }
+
+    document.getElementById('form-add-user')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fullName = document.getElementById('add-user-fullname').value.trim();
+      const email = document.getElementById('add-user-email').value.trim();
+      const phone = document.getElementById('add-user-phone').value.trim();
+      const homeCity = document.getElementById('add-user-city').value.trim();
+      const role = document.getElementById('add-user-role').value;
+      const lastTravelInput = document.getElementById('add-user-lasttravel').value.trim();
+
+      const user = AdminUserStore.addUser({
+        fullName,
+        email,
+        phone,
+        homeCity,
+        role,
+        lastTravel: lastTravelInput || null
+      });
+
+      renderUsersTable();
+      refreshMetrics();
+      closeAddUserModal();
+      Toast.success(`Traveler ${fullName} registered!`);
+    });
+
+    document.getElementById('input-search-users')?.addEventListener('input', Utils.debounce(renderUsersTable, 200));
+    document.getElementById('select-filter-role')?.addEventListener('change', renderUsersTable);
+
+    // ==============================================================
+    // CHILD 2: GUIDES MANAGEMENT & VERIFICATION LOGIC
+    // ==============================================================
+    function renderGuidesList() {
+      const container = document.getElementById('guides-grid-container');
+      if (!container) return;
+
+      const destFilter = document.getElementById('select-guide-dest')?.value || 'ALL';
+      const statusFilter = document.getElementById('select-guide-status')?.value || 'ALL';
+
+      let guides = GuidesStore.getAll();
+
+      if (destFilter !== 'ALL') {
+        guides = guides.filter(g => g.destination.toLowerCase() === destFilter.toLowerCase());
+      }
+
+      if (statusFilter === 'VERIFIED') {
+        guides = guides.filter(g => g.isVerified);
+      } else if (statusFilter === 'PENDING') {
+        guides = guides.filter(g => !g.isVerified);
+      }
+
+      container.innerHTML = '';
+
+      if (!guides.length) {
+        container.innerHTML = `
+          <div style="grid-column:1/-1; background:var(--clr-surface); border:1px dashed var(--clr-border); border-radius:var(--radius-lg); padding:var(--space-8); text-align:center;">
+            <p style="color:var(--clr-text-muted); font-size:var(--text-sm); margin:0;">
+              No guides found for the selected destination and status.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      guides.forEach(guide => {
+        const isVerified = guide.isVerified;
+        const card = document.createElement('div');
+        card.className = 'guide-admin-card';
+
+        card.innerHTML = `
+          <div>
+            <div class="guide-admin-header">
+              <img class="guide-admin-avatar" src="${guide.photo}" alt="${guide.name}" />
+              <div style="flex:1;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                  <h3 style="font-size:var(--text-lg); color:#fff; margin:0 0 2px;">${guide.name}</h3>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                  <span class="badge-pill" style="font-size:10px; background:rgba(14,165,233,0.15); color:var(--clr-primary-light);">
+                    📍 ${guide.destination}, ${guide.state}
+                  </span>
+                  <span style="color:var(--clr-warning); font-size:11px; font-weight:700;">
+                    ★ ${guide.rating} <span style="font-weight:400; color:var(--clr-text-muted);">(${guide.reviewCount} tours)</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Verification Status Badge & Audit Stamp -->
+            <div style="margin-bottom:var(--space-3); padding:var(--space-2) var(--space-3); background:var(--clr-surface-2); border-radius:var(--radius-md); display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span class="status-badge ${isVerified ? 'verified' : 'pending'}">
+                  <i class="fa-solid ${isVerified ? 'fa-shield-check' : 'fa-clock'}"></i>
+                  ${isVerified ? 'Verified Guide' : 'Pending Verification'}
+                </span>
+              </div>
+              <div style="font-size:11px; color:var(--clr-text-muted);">
+                ${guide.verifiedAt || 'Awaiting Admin Audit'}
+              </div>
+            </div>
+
+            <!-- Credentials & Rate -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-2); font-size:12px; margin-bottom:var(--space-3); color:var(--clr-text-muted);">
+              <div><strong style="color:#fff;"><i class="fa-solid fa-briefcase" style="color:var(--clr-primary-light);"></i> Experience:</strong> ${guide.experienceYears} Years</div>
+              <div><strong style="color:var(--clr-accent);"><i class="fa-solid fa-tag"></i> Daily Fee:</strong> ${guide.dailyFee}</div>
+              <div style="grid-column:1/-1;"><strong style="color:#fff;"><i class="fa-solid fa-language" style="color:#a855f7;"></i> Languages:</strong> ${guide.languages}</div>
+              <div style="grid-column:1/-1;"><strong style="color:#fff;"><i class="fa-solid fa-phone" style="color:var(--clr-accent);"></i> Phone:</strong> ${guide.phone}</div>
+            </div>
+
+            <div style="margin-bottom:var(--space-3); font-size:12px;">
+              <strong style="color:var(--clr-primary-light); display:block; margin-bottom:2px;"><i class="fa-solid fa-mountain-sun"></i> Specialization:</strong>
+              <div style="color:var(--clr-text); line-height:1.4;">${guide.specialization}</div>
+            </div>
+
+            <p style="font-size:12px; color:var(--clr-text-muted); line-height:1.5; margin:0 0 var(--space-4); background:rgba(0,0,0,0.2); padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm); font-style:italic;">
+              "${guide.bio}"
+            </p>
+          </div>
+
+          <!-- Bottom Action Buttons: Verify / Revoke & Edit -->
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--clr-border); padding-top:var(--space-3); gap:var(--space-2);">
+            <div>
+              <button type="button" class="btn btn-outline btn-sm" onclick="openEditGuideModal('${guide.id}')" style="font-size:11px; padding:4px 8px;" title="Edit details">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+              </button>
+            </div>
+
+            <div>
+              ${isVerified ? `
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleGuideVerification('${guide.id}', false)" style="font-size:11px; padding:4px 10px; color:#f87171; border-color:rgba(239,68,68,0.35);" title="Revoke verification badge">
+                  <i class="fa-solid fa-ban"></i> Revoke
+                </button>
+              ` : `
+                <button type="button" class="btn btn-primary btn-sm" onclick="toggleGuideVerification('${guide.id}', true)" style="font-size:11px; padding:4px 12px; background:var(--clr-accent); border-color:var(--clr-accent);" title="Approve and verify guide">
+                  <i class="fa-solid fa-circle-check"></i> Verify Guide
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function toggleGuideVerification(guideId, newStatus) {
+      const guide = GuidesStore.verifyGuide(guideId, newStatus);
+      if (!guide) return;
+
+      renderGuidesList();
+      refreshMetrics();
+
+      if (newStatus) {
+        Toast.success(`🛡️ Guide ${guide.name} is now VERIFIED! Badge awarded.`);
+      } else {
+        Toast.info(`Guide ${guide.name} verification has been revoked.`);
+      }
+    }
+
+    function filterGuidesStatus(status) {
+      const select = document.getElementById('select-guide-status');
+      if (select) {
+        select.value = status;
+        renderGuidesList();
+      }
+    }
+
+    // Edit Guide Modal Handlers
+    function openEditGuideModal(guideId) {
+      const guide = GuidesStore.getById(guideId);
+      if (!guide) return;
+
+      document.getElementById('edit-guide-id').value = guide.id;
+      document.getElementById('edit-guide-name').value = guide.name || '';
+      document.getElementById('edit-guide-dest').value = guide.destination || 'Ooty';
+      document.getElementById('edit-guide-exp').value = guide.experienceYears || 3;
+      document.getElementById('edit-guide-fee').value = guide.dailyFee || '₹1,200/day';
+      document.getElementById('edit-guide-lang').value = guide.languages || '';
+      document.getElementById('edit-guide-phone').value = guide.phone || '';
+      document.getElementById('edit-guide-spec').value = guide.specialization || '';
+      document.getElementById('edit-guide-bio').value = guide.bio || '';
+
+      document.getElementById('modal-edit-guide').classList.add('open');
+    }
+
+    function closeEditGuideModal() {
+      document.getElementById('modal-edit-guide').classList.remove('open');
+    }
+
+    document.getElementById('form-edit-guide')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('edit-guide-id').value;
+      const name = document.getElementById('edit-guide-name').value.trim();
+      const destination = document.getElementById('edit-guide-dest').value;
+      const experienceYears = parseInt(document.getElementById('edit-guide-exp').value) || 3;
+      const dailyFee = document.getElementById('edit-guide-fee').value.trim();
+      const languages = document.getElementById('edit-guide-lang').value.trim();
+      const phone = document.getElementById('edit-guide-phone').value.trim();
+      const specialization = document.getElementById('edit-guide-spec').value.trim();
+      const bio = document.getElementById('edit-guide-bio').value.trim();
+
+      GuidesStore.updateGuide(id, {
+        name, destination, experienceYears, dailyFee, languages, phone, specialization, bio
+      });
+
+      renderGuidesList();
+      refreshMetrics();
+      closeEditGuideModal();
+      Toast.success(`Updated information for guide ${name}!`);
+    });
+
+    // Add Guide Modal Handlers
+    function openAddGuideModal() {
+      document.getElementById('form-add-guide')?.reset();
+      document.getElementById('modal-add-guide').classList.add('open');
+    }
+
+    function closeAddGuideModal() {
+      document.getElementById('modal-add-guide').classList.remove('open');
+    }
+
+    document.getElementById('form-add-guide')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('add-guide-name').value.trim();
+      const destination = document.getElementById('add-guide-dest').value;
+      const experienceYears = parseInt(document.getElementById('add-guide-exp').value) || 4;
+      const dailyFee = document.getElementById('add-guide-fee').value.trim();
+      const languages = document.getElementById('add-guide-lang').value.trim();
+      const phone = document.getElementById('add-guide-phone').value.trim();
+      const specialization = document.getElementById('add-guide-spec').value.trim();
+      const isVerified = document.getElementById('add-guide-verified').value === 'true';
+
+      GuidesStore.addGuide({
+        name, destination, experienceYears, dailyFee, languages, phone, specialization, isVerified
+      });
+
+      renderGuidesList();
+      refreshMetrics();
+      closeAddGuideModal();
+      Toast.success(`New local guide ${name} added!`);
+    });
+
+    // ==============================================================
+    // SAFETY ALERTS DISPATCH QUEUE
+    // ==============================================================
+    function renderAlertsTable() {
+      const tbody = document.getElementById('alerts-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      ALERTS_DATA.forEach((alt, idx) => {
+        const badgeClass = alt.status.toLowerCase();
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>#${alt.id}</strong></td>
+            <td>
+              <div style="font-weight:600; color:#fff;">${alt.traveler}</div>
+              <div style="font-size:11px; color:var(--clr-text-muted);">${alt.phone}</div>
+            </td>
+            <td>
+              <span style="font-weight:600; color:#fff;">${alt.type}</span>
+              <div style="font-size:11px; color:${alt.severity === 'CRITICAL' ? 'var(--clr-danger)' : alt.severity === 'HIGH' ? '#fb923c' : 'var(--clr-text-muted)'}; font-weight:700;">${alt.severity}</div>
+            </td>
+            <td>
+              <div>${alt.loc}</div>
+            </td>
+            <td>
+              <span class="status-badge ${badgeClass}">${alt.status.replace('_', ' ')}</span>
+            </td>
+            <td style="color:var(--clr-text-muted); font-size:12px;">${alt.time}</td>
+            <td>
+              ${alt.status === 'PENDING' ? `
+                <button class="btn btn-outline btn-sm" onclick="updateAlertStatus(${idx}, 'IN_PROGRESS')" style="padding:4px 8px; font-size:11px; border-color:#fbbf24; color:#fbbf24;">
+                  Dispatch
+                </button>
+              ` : alt.status === 'IN_PROGRESS' ? `
+                <button class="btn btn-primary btn-sm" onclick="updateAlertStatus(${idx}, 'RESOLVED')" style="padding:4px 8px; font-size:11px; background:var(--clr-accent); border-color:var(--clr-accent);">
+                  Resolve
+                </button>
+              ` : `
+                <span style="color:var(--clr-accent); font-size:12px;"><i class="fa-solid fa-check"></i> Done</span>
+              `}
+            </td>
+          </tr>
+        `;
+      });
+
+      refreshMetrics();
+    }
+
+    function updateAlertStatus(idx, newStatus) {
+      ALERTS_DATA[idx].status = newStatus;
+      renderAlertsTable();
+      Toast.success(`Alert #${ALERTS_DATA[idx].id} status updated to ${newStatus}`);
+    }
+
+    // Initialize Everything
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshMetrics();
+      renderUsersTable();
+      renderGuidesList();
+      renderAlertsTable();
+    });
+  </script>
+</body>
+</html>

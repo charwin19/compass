@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Traveler Profile & Past Journeys — View your profile details, customize your traveler logo, and revisit your completed travel adventures." />
+  <title>My Profile & Past Travel Journeys — Compass</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Instant Auth Guard -->
+  <script>
+    if (!localStorage.getItem('st_token')) {
+      sessionStorage.setItem('st_redirect_after_login', window.location.href);
+      alert('🔒 Access Restricted: Please log in to view your profile and past travel history.');
+      window.location.href = 'login.html';
+    }
+  </script>
+
+  <style>
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: var(--glass-blur);
+      z-index: 2000;
+      display: none;
+      place-items: center;
+      padding: var(--space-4);
+      animation: fade-in 0.2s ease;
+    }
+    .modal-overlay.open {
+      display: grid;
+    }
+    .modal-content {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border-light);
+      border-radius: var(--radius-xl);
+      max-width: 580px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: var(--space-6);
+      box-shadow: var(--shadow-lg);
+    }
+    .profile-nav-tabs {
+      display: flex;
+      gap: var(--space-2);
+      border-bottom: 1px solid var(--clr-border);
+      margin-bottom: var(--space-6);
+    }
+    .profile-nav-tab {
+      padding: var(--space-3) var(--space-5);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--clr-text-muted);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition-fast);
+    }
+    .profile-nav-tab:hover {
+      color: #fff;
+    }
+    .profile-nav-tab.active {
+      color: var(--clr-primary-light);
+      border-bottom-color: var(--clr-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <a href="index.html" class="nav-logo" aria-label="Compass Home">
+        <div class="nav-logo-icon">🧭</div>
+        <span class="nav-logo-text">Com<span>pass</span></span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="index.html#destinations" class="nav-link">Explore</a></li>
+        <li><a href="planner.html" class="nav-link">Travel Planner</a></li>
+        <li><a href="weather.html" class="nav-link">Weather</a></li>
+        <li><a href="emergency.html" class="nav-link">Emergency</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="login.html" class="btn btn-outline btn-sm" id="nav-login-btn">Login</a>
+        <a href="login.html#register" class="btn btn-primary btn-sm" id="nav-register-btn">Get Started</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle mobile menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile nav -->
+  <div class="mobile-nav" id="mobile-nav" role="menu">
+    <a href="index.html" class="nav-link" role="menuitem">Home</a>
+    <a href="index.html#destinations" class="nav-link" role="menuitem">Explore</a>
+    <a href="planner.html" class="nav-link" role="menuitem">Travel Planner</a>
+    <a href="weather.html" class="nav-link" role="menuitem">Weather</a>
+    <a href="emergency.html" class="nav-link" role="menuitem">Emergency</a>
+    <div style="display:flex;gap:var(--space-3);margin-top:var(--space-2);">
+      <a href="login.html" class="btn btn-outline btn-sm" style="flex:1">Login</a>
+      <a href="login.html#register" class="btn btn-primary btn-sm" style="flex:1">Register</a>
+    </div>
+  </div>
+
+  <!-- Profile Header Hero -->
+  <header class="profile-page-header">
+    <div class="container">
+      
+      <div class="profile-hero-card">
+        <div class="profile-avatar-container">
+          <div class="profile-avatar-wrapper" id="profile-avatar-wrapper" title="Click to upgrade profile photo">
+            <div class="profile-logo-large" id="profile-logo-display">
+              <span id="profile-avatar-icon">🧭</span>
+            </div>
+            <div class="profile-avatar-overlay">
+              <i class="fa-solid fa-camera"></i>
+              <span>Upgrade</span>
+            </div>
+            <button type="button" class="avatar-badge-edit" id="btn-edit-avatar" title="Upgrade traveler photo">
+              <i class="fa-solid fa-camera"></i>
+            </button>
+          </div>
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+              <span class="badge-pill" style="background:rgba(16,185,129,0.2); color:#34d399; border-color:rgba(16,185,129,0.3);">
+                <i class="fa-solid fa-circle-check"></i> Verified Traveler
+              </span>
+              <span class="badge-pill" id="profile-role-pill" style="background:rgba(14,165,233,0.2); color:var(--clr-primary-light);">
+                Gold Globetrotter
+              </span>
+            </div>
+            <h1 id="profile-name-display" style="font-size:clamp(var(--text-2xl), 3vw, var(--text-3xl)); margin:2px 0 4px; color:#fff;">
+              Traveler Profile
+            </h1>
+            <p id="profile-email-display" style="color:var(--clr-text-muted); font-size:var(--text-sm); margin:0;">
+              traveler@smarttourism.com
+            </p>
+            <div style="display:flex; align-items:center; gap:var(--space-4); margin-top:var(--space-2); font-size:12px; color:var(--clr-text-faint); flex-wrap:wrap;">
+              <span><i class="fa-solid fa-location-dot" style="color:var(--clr-accent);"></i> <span id="profile-city-text">Bangalore, Karnataka</span></span>
+              <span><i class="fa-solid fa-calendar-check" style="color:var(--clr-primary-light);"></i> Member since <span id="profile-member-since">March 2024</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:var(--space-3); flex-wrap:wrap; align-items:center;">
+          <button type="button" class="btn btn-outline btn-sm" id="btn-upgrade-photo">
+            <i class="fa-solid fa-camera"></i> Upgrade Photo
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-open-edit-profile">
+            <i class="fa-solid fa-user-pen"></i> Edit Details
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-open-add-trip">
+            <i class="fa-solid fa-plus"></i> Log Past Travel
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Profile Dashboard -->
+  <main class="container">
+    <div class="profile-content-grid">
+
+      <!-- Left Sidebar: Traveler Identity & Contact Info -->
+      <aside class="planner-card">
+        <h2 style="font-size:var(--text-lg); margin-bottom:var(--space-4); display:flex; align-items:center; gap:8px; color:#fff;">
+          <i class="fa-solid fa-id-card" style="color:var(--clr-primary-light);"></i> Traveler Information
+        </h2>
+
+        <div style="margin-bottom:var(--space-4);">
+          <div style="font-size:11px; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.5px;">Full Legal Name</div>
+          <strong id="card-fullname" style="color:#fff; font-size:var(--text-base); display:block; margin-top:2px;">—</strong>
+        </div>
+
+        <div style="margin-bottom:var(--space-4);">
+          <div style="font-size:11px; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.5px;">Registered Email</div>
+          <div id="card-email" style="color:var(--clr-text); font-size:var(--text-sm); margin-top:2px;">—</div>
+        </div>
+
+        <div style="margin-bottom:var(--space-4);">
+          <div style="font-size:11px; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.5px;">Phone Number</div>
+          <div id="card-phone" style="color:var(--clr-text); font-size:var(--text-sm); margin-top:2px;">—</div>
+        </div>
+
+        <div style="margin-bottom:var(--space-4);">
+          <div style="font-size:11px; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.5px;">Home City / Base</div>
+          <div id="card-city" style="color:var(--clr-text); font-size:var(--text-sm); margin-top:2px;">—</div>
+        </div>
+
+        <div style="margin-bottom:var(--space-4);">
+          <div style="font-size:11px; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.5px;">Preferred Travel Style</div>
+          <div id="card-style" class="badge-pill" style="margin-top:4px; font-size:12px; background:rgba(14,165,233,0.15); color:var(--clr-primary-light);">
+            Moderate Explorer
+          </div>
+        </div>
+
+        <div style="margin-bottom:var(--space-4);">
+          <div style="font-size:11px; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.5px;">Emergency Contact</div>
+          <div id="card-emergency" style="color:var(--clr-danger); font-size:var(--text-sm); font-weight:600; margin-top:2px;">
+            <i class="fa-solid fa-phone-volume"></i> —
+          </div>
+        </div>
+
+        <div style="margin-bottom:var(--space-4); border-top:1px solid var(--clr-border); padding-top:var(--space-4);">
+          <div style="font-size:11px; color:var(--clr-text-muted); text-transform:uppercase; letter-spacing:0.5px;">Traveler Bio / Motto</div>
+          <p id="card-bio" style="color:var(--clr-text-muted); font-size:13px; line-height:1.6; margin-top:4px;">
+            —
+          </p>
+        </div>
+
+        <div style="border-top:1px solid var(--clr-border); padding-top:var(--space-4);">
+          <a href="planner.html" class="btn btn-primary btn-sm" style="width:100%; justify-content:center;">
+            <i class="fa-solid fa-compass"></i> Plan Next Journey
+          </a>
+        </div>
+      </aside>
+
+      <!-- Right Column: Past Travel Journeys & Experience Diary -->
+      <section>
+
+        <!-- Stats Row -->
+        <div class="profile-stats-grid" style="margin-bottom:var(--space-6);">
+          <div class="profile-stat-box">
+            <div class="profile-stat-num" id="stat-total-trips">0</div>
+            <div class="profile-stat-label">Past Trips</div>
+          </div>
+          <div class="profile-stat-box">
+            <div class="profile-stat-num" id="stat-total-days">0</div>
+            <div class="profile-stat-label">Days Explored</div>
+          </div>
+          <div class="profile-stat-box">
+            <div class="profile-stat-num" id="stat-total-spend">₹0</div>
+            <div class="profile-stat-label">Total Spend</div>
+          </div>
+          <div class="profile-stat-box">
+            <div class="profile-stat-num" id="stat-avg-rating" style="color:var(--clr-warning);">0</div>
+            <div class="profile-stat-label">Avg Experience</div>
+          </div>
+        </div>
+
+        <!-- Section Navigation Tabs -->
+        <div class="profile-nav-tabs" role="tablist">
+          <button class="profile-nav-tab active" id="tab-past-trips" role="tab" aria-selected="true">
+            <i class="fa-solid fa-plane-departure"></i> Completed Past Travels (<span id="trip-count-badge">0</span>)
+          </button>
+          <button class="profile-nav-tab" id="tab-travel-stats" role="tab" aria-selected="false">
+            <i class="fa-solid fa-award"></i> Travel Badges & Achievements
+          </button>
+        </div>
+
+        <!-- TAB 1: Past Travel History List -->
+        <div id="content-past-trips">
+          
+          <!-- Last Travel / null Feature Banner -->
+          <div id="last-travel-showcase-container" style="margin-bottom:var(--space-6);">
+            <!-- Rendered by JS: shows latest journey OR explicit null state -->
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-4); flex-wrap:wrap; gap:var(--space-2);">
+            <div>
+              <h2 style="font-size:var(--text-xl); color:#fff; margin:0 0 2px;">
+                <i class="fa-solid fa-book-atlas" style="color:var(--clr-primary-light);"></i> Past Travel Diary & Archive
+              </h2>
+              <p style="font-size:var(--text-xs); color:var(--clr-text-muted); margin:0;">
+                All logged adventures, memory logs, and expenses.
+              </p>
+            </div>
+            <div style="display:flex; gap:var(--space-2); flex-wrap:wrap;">
+              <button type="button" class="btn btn-outline btn-sm" id="btn-test-null" style="font-size:11px; padding:4px 10px; color:#f87171; border-color:rgba(239,68,68,0.3);" title="Set travel history to 0 trips (null state)">
+                <i class="fa-solid fa-ban"></i> Reset to 0 Trips (null)
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-test-restore" style="font-size:11px; padding:4px 10px; color:var(--clr-primary-light);" title="Restore sample past journeys">
+                <i class="fa-solid fa-rotate-left"></i> Load Sample Trips
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="window.print()" title="Print Travel Summary" style="font-size:11px; padding:4px 10px;">
+                <i class="fa-solid fa-print"></i> Print
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Past Trips Container -->
+          <div id="past-trips-list">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- TAB 2: Badges & Achievements -->
+        <div id="content-travel-stats" style="display:none;">
+          <div id="badges-container">
+            <!-- Rendered dynamically by JS depending on trips count -->
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ================= EDIT PROFILE DETAILS MODAL ================= -->
+  <div class="modal-overlay" id="modal-edit-profile" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-4); border-bottom:1px solid var(--clr-border); padding-bottom:var(--space-3);">
+        <h3 id="edit-profile-title" style="font-size:var(--text-lg); color:#fff; margin:0;">
+          <i class="fa-solid fa-user-pen" style="color:var(--clr-primary-light);"></i> Edit Traveler Details
+        </h3>
+        <button type="button" class="btn-modal-close" id="btn-close-edit-modal" style="background:none; border:none; color:var(--clr-text-muted); font-size:1.4rem; cursor:pointer;">✕</button>
+      </div>
+
+      <form id="form-edit-profile">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label" for="input-fullname">Full Name</label>
+            <input type="text" id="input-fullname" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-email">Email Address</label>
+            <input type="email" id="input-email" class="form-input" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label" for="input-phone">Phone Number</label>
+            <input type="text" id="input-phone" class="form-input" placeholder="+91 98765 43210" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-city">Home City / Base</label>
+            <input type="text" id="input-city" class="form-input" placeholder="e.g. Bangalore, Karnataka" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label" for="input-style">Preferred Travel Style</label>
+            <select id="input-style" class="form-input" style="background:var(--clr-surface-2);">
+              <option value="Moderate Explorer">Moderate Explorer</option>
+              <option value="Luxury / Premium">Luxury / Premium</option>
+              <option value="Budget / Backpacker">Budget / Backpacker</option>
+              <option value="Adventure & Trekking">Adventure & Trekking</option>
+              <option value="Family Vacations">Family Vacations</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-emergency">Emergency Contact</label>
+            <input type="text" id="input-emergency" class="form-input" placeholder="+91 98450 11223 (Spouse)" required />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-5);">
+          <label class="form-label" for="input-bio">Traveler Bio / Motto</label>
+          <textarea id="input-bio" class="form-input" rows="3" placeholder="Share your travel spirit and favorite experiences..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:var(--space-3);">
+          <button type="button" class="btn btn-outline btn-sm" id="btn-cancel-edit-profile">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-floppy-disk"></i> Save Profile Details
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= UPGRADE PHOTO / LOGO MODAL ================= -->
+  <div class="modal-overlay" id="modal-edit-avatar" role="dialog" aria-modal="true" aria-labelledby="avatar-modal-title">
+    <div class="modal-content" style="max-width: 540px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-4); border-bottom:1px solid var(--clr-border); padding-bottom:var(--space-3);">
+        <h3 id="avatar-modal-title" style="font-size:var(--text-lg); color:#fff; margin:0; display:flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-camera-retro" style="color:var(--clr-primary-light);"></i> Upgrade Profile Photo
+        </h3>
+        <button type="button" id="btn-close-avatar-modal" style="background:none; border:none; color:var(--clr-text-muted); font-size:1.4rem; cursor:pointer;" aria-label="Close modal">✕</button>
+      </div>
+
+      <!-- Live Photo Preview Box -->
+      <div style="background:var(--clr-surface-2); border:1px solid var(--clr-border); border-radius:var(--radius-lg); padding:var(--space-4); margin-bottom:var(--space-4); text-align:center;">
+        <div style="width:96px; height:96px; border-radius:50%; margin:0 auto var(--space-2); overflow:hidden; border:3.5px solid var(--clr-primary); display:flex; align-items:center; justify-content:center; background:var(--clr-surface); box-shadow:0 0 20px rgba(14,165,233,0.35);">
+          <img id="avatar-preview-img" src="" alt="Preview" style="width:100%; height:100%; object-fit:cover; display:none;" />
+          <span id="avatar-preview-emoji" style="font-size:2.8rem;">🧭</span>
+        </div>
+        <div style="font-size:12px; font-weight:600; color:var(--clr-text-muted); margin-bottom:var(--space-2);">Live Preview</div>
+        <button type="button" id="btn-reset-avatar" class="badge-pill" style="background:rgba(239, 68, 68, 0.15); color:#fca5a5; border-color:rgba(239, 68, 68, 0.3); cursor:pointer;">
+          <i class="fa-solid fa-rotate-left"></i> Reset to Default Insignia
+        </button>
+      </div>
+
+      <!-- Method 1: Local File Drag & Drop / Upload -->
+      <div class="avatar-dropzone" id="avatar-dropzone">
+        <div style="font-size:1.8rem; margin-bottom:4px; color:var(--clr-primary-light);"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+        <div style="font-size:14px; font-weight:600; color:#fff; margin-bottom:2px;">Drag & Drop your photo here</div>
+        <div style="font-size:12px; color:var(--clr-text-muted); margin-bottom:var(--space-3);">or browse from your device (JPG, PNG, WEBP, GIF up to 5MB)</div>
+        <label for="input-avatar-file" class="btn btn-outline btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i> Browse Device Photos
+        </label>
+        <input type="file" id="input-avatar-file" accept="image/*" style="display:none;" />
+      </div>
+
+      <!-- Method 2: Curated HD Traveler Portrait Presets -->
+      <div style="margin-bottom:var(--space-4);">
+        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Curated Traveler Portraits</span>
+          <span style="font-size:11px; color:var(--clr-text-faint); font-weight:normal;">1-Click HD Photos</span>
+        </label>
+        <div class="avatar-photo-grid" id="avatar-photo-presets">
+          <button type="button" class="avatar-photo-btn" data-url="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" title="Explorer - Elena">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Elena" />
+          </button>
+          <button type="button" class="avatar-photo-btn" data-url="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80" title="Backpacker - Rahul">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80" alt="Rahul" />
+          </button>
+          <button type="button" class="avatar-photo-btn" data-url="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80" title="Adventurer - Maya">
+            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80" alt="Maya" />
+          </button>
+          <button type="button" class="avatar-photo-btn" data-url="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80" title="Urban Wanderer - Alex">
+            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80" alt="Alex" />
+          </button>
+          <button type="button" class="avatar-photo-btn" data-url="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&auto=format&fit=crop&q=80" title="Solo Traveler - Priya">
+            <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&auto=format&fit=crop&q=80" alt="Priya" />
+          </button>
+          <button type="button" class="avatar-photo-btn" data-url="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80" title="Nature Hiker - Neil">
+            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80" alt="Neil" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Method 3: Direct Web Image Link -->
+      <div class="form-group" style="margin-bottom:var(--space-4);">
+        <label class="form-label" for="input-avatar-url">Or Paste Direct Image Link</label>
+        <div style="display:flex; gap:var(--space-2);">
+          <input type="url" id="input-avatar-url" class="form-input" placeholder="https://images.unsplash.com/... or any web photo" />
+          <button type="button" class="btn btn-outline btn-sm" id="btn-preview-url" style="white-space:nowrap;">
+            <i class="fa-solid fa-eye"></i> Preview
+          </button>
+        </div>
+      </div>
+
+      <!-- Method 4: Travel Insignias -->
+      <div style="margin-bottom:var(--space-5);">
+        <label class="form-label">Or Pick Travel Insignia</label>
+        <div class="avatar-selector-grid" id="avatar-options">
+          <button type="button" class="avatar-choice-btn active" data-avatar="🧭" title="Compass Navigator">🧭</button>
+          <button type="button" class="avatar-choice-btn" data-avatar="🏔️" title="Mountain Climber">🏔️</button>
+          <button type="button" class="avatar-choice-btn" data-avatar="✈️" title="Sky Aviator">✈️</button>
+          <button type="button" class="avatar-choice-btn" data-avatar="🎒" title="Backpacker">🎒</button>
+          <button type="button" class="avatar-choice-btn" data-avatar="🌴" title="Coastal Explorer">🌴</button>
+          <button type="button" class="avatar-choice-btn" data-avatar="🦁" title="Wildlife Enthusiast">🦁</button>
+          <button type="button" class="avatar-choice-btn" data-avatar="🏰" title="Heritage Seeker">🏰</button>
+          <button type="button" class="avatar-choice-btn" data-avatar="☕" title="Hill Station Connoisseur">☕</button>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:var(--space-3); border-top:1px solid var(--clr-border); padding-top:var(--space-3);">
+        <button type="button" class="btn btn-outline btn-sm" id="btn-cancel-avatar">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-save-avatar">
+          <i class="fa-solid fa-check"></i> Save & Apply Photo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LOG PAST TRIP MODAL ================= -->
+  <div class="modal-overlay" id="modal-add-trip" role="dialog" aria-modal="true" aria-labelledby="add-trip-title">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-4); border-bottom:1px solid var(--clr-border); padding-bottom:var(--space-3);">
+        <h3 id="add-trip-title" style="font-size:var(--text-lg); color:#fff; margin:0;">
+          <i class="fa-solid fa-map-pin" style="color:var(--clr-accent);"></i> Record a Completed Journey
+        </h3>
+        <button type="button" id="btn-close-trip-modal" style="background:none; border:none; color:var(--clr-text-muted); font-size:1.4rem; cursor:pointer;">✕</button>
+      </div>
+
+      <form id="form-add-trip">
+        <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label" for="trip-destination">Destination Name</label>
+            <select id="trip-destination" class="form-input" style="background:var(--clr-surface-2);" required>
+              <option value="Munnar">Munnar, Kerala</option>
+              <option value="Kodaikanal">Kodaikanal, Tamil Nadu</option>
+              <option value="Ooty">Ooty, Tamil Nadu</option>
+              <option value="Mysore">Mysore, Karnataka</option>
+              <option value="Coimbatore">Coimbatore, Tamil Nadu</option>
+              <option value="Chennai">Chennai, Tamil Nadu</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="trip-duration">Duration</label>
+            <select id="trip-duration" class="form-input" style="background:var(--clr-surface-2);">
+              <option value="2 Days">2 Days</option>
+              <option value="3 Days" selected>3 Days</option>
+              <option value="4 Days">4 Days</option>
+              <option value="5 Days">5 Days</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-3);">
+          <label class="form-label" for="trip-title">Journey Title / Headline</label>
+          <input type="text" id="trip-title" class="form-input" placeholder="e.g. Scenic Tea Gardens & Waterfalls Trek" required />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label" for="trip-dates">Dates Traveled</label>
+            <input type="text" id="trip-dates" class="form-input" placeholder="e.g. Sep 2024" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="trip-spend">Total Budget Spent (INR)</label>
+            <input type="text" id="trip-spend" class="form-input" placeholder="e.g. ₹15,000" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); margin-bottom:var(--space-3);">
+          <div class="form-group">
+            <label class="form-label" for="trip-travelers">Travel Companions</label>
+            <select id="trip-travelers" class="form-input" style="background:var(--clr-surface-2);">
+              <option value="Solo Explorer">Solo Explorer</option>
+              <option value="2 Persons (Couple)" selected>Couple (2 Persons)</option>
+              <option value="3-4 Persons (Friends)">Friends Group</option>
+              <option value="Family (4+ Persons)">Family Vacation</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="trip-rating">Your Overall Rating</label>
+            <select id="trip-rating" class="form-input" style="background:var(--clr-surface-2);">
+              <option value="★★★★★">★★★★★ (5 Stars - Amazing)</option>
+              <option value="★★★★☆">★★★★☆ (4 Stars - Great)</option>
+              <option value="★★★☆☆">★★★☆☆ (3 Stars - Good)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-3);">
+          <label class="form-label" for="trip-highlights">Key Highlights & Sights Visited</label>
+          <input type="text" id="trip-highlights" class="form-input" placeholder="e.g. Boating, Viewpoint sunrise, Botanical gardens" required />
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-3);">
+          <label class="form-label" for="trip-story">Your Travel Experience & Memories</label>
+          <textarea id="trip-story" class="form-input" rows="2" placeholder="What made this travel journey special to you?" required></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:var(--space-4);">
+          <label class="form-label" for="trip-tip">Pro-Tip for Other Travelers</label>
+          <input type="text" id="trip-tip" class="form-input" placeholder="e.g. Arrive before 8 AM to avoid tourist rush." />
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:var(--space-3);">
+          <button type="button" class="btn btn-outline btn-sm" id="btn-cancel-trip">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-check"></i> Record Past Travel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <div class="nav-logo-icon">🧭</div>
+            <span class="nav-logo-text">Com<span>pass</span></span>
+          </a>
+          <p>India's all-in-one travel companion — smart personalized planning, local guides, live weather, and traveler safety.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <nav class="footer-links">
+            <a href="index.html#destinations" class="footer-link">Popular Destinations</a>
+            <a href="planner.html" class="footer-link">Travel Planner</a>
+            <a href="weather.html" class="footer-link">Live Weather</a>
+          </nav>
+        </div>
+        <div class="footer-col">
+          <h4>Account & Support</h4>
+          <nav class="footer-links">
+            <a href="profile.html" class="footer-link">Traveler Profile</a>
+            <a href="emergency.html" class="footer-link">Emergency Help</a>
+            <a href="login.html" class="footer-link">Switch Account</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2024 Compass. Built for safer, smarter travel across India.</p>
+        <p style="color:var(--clr-primary);font-weight:600;"><i class="fa-solid fa-shield-halved"></i> Emergency: Dial 112</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let pendingUploadedAvatar = null;
+
+      // 1. Refresh Profile View
+      function refreshProfileView() {
+        const user = UserProfileStore.getProfile();
+        if (!user) return;
+
+        // Render Avatar / Photo
+        const avatarDisplay = document.getElementById('profile-logo-display');
+        const isImage = user.avatar && (user.avatar.startsWith('http') || user.avatar.startsWith('data:image'));
+        if (isImage) {
+          avatarDisplay.innerHTML = `<img src="${user.avatar}" alt="${user.fullName || 'Traveler'}" />`;
+        } else {
+          avatarDisplay.innerHTML = `<span id="profile-avatar-icon">${user.avatar || '🧭'}</span>`;
+        }
+
+        // Header Info
+        document.getElementById('profile-name-display').textContent = user.fullName || 'Traveler';
+        document.getElementById('profile-email-display').textContent = user.email || '';
+        document.getElementById('profile-city-text').textContent = user.homeCity || 'Bangalore, Karnataka';
+        document.getElementById('profile-member-since').textContent = user.memberSince || 'March 2024';
+
+        if (user.role === 'ROLE_ADMIN') {
+          document.getElementById('profile-role-pill').textContent = 'Administrator';
+        }
+
+        // Left Sidebar Card Info
+        document.getElementById('card-fullname').textContent = user.fullName || '—';
+        document.getElementById('card-email').textContent = user.email || '—';
+        document.getElementById('card-phone').textContent = user.phone || '—';
+        document.getElementById('card-city').textContent = user.homeCity || '—';
+        document.getElementById('card-style').textContent = user.travelStyle || 'Moderate Explorer';
+        document.getElementById('card-emergency').innerHTML = `<i class="fa-solid fa-phone-volume"></i> ${user.emergencyContact || 'Not specified'}`;
+        document.getElementById('card-bio').textContent = user.bio || 'Exploring India with curiosity, passion, and mindful wanderlust.';
+
+        // Render Last Travel Showcase & Past Travels List
+        renderLastTravelShowcase();
+        renderPastTrips();
+      }
+
+      // 2. Render Last Travel Feature Showcase (handles last trip OR explicit null)
+      function renderLastTravelShowcase() {
+        const container = document.getElementById('last-travel-showcase-container');
+        if (!container) return;
+
+        const lastTrip = UserProfileStore.getLastTrip();
+
+        if (!lastTrip) {
+          // Explicit NULL State
+          container.innerHTML = `
+            <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.85)); border: 2px dashed rgba(148, 163, 184, 0.3); border-radius: var(--radius-xl); padding: var(--space-6); text-align: center; position: relative;">
+              <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 12px; border-radius:var(--radius-full); font-size:11px; font-weight:700; background:rgba(239, 68, 68, 0.15); color:#fca5a5; border:1px solid rgba(239, 68, 68, 0.3); margin-bottom:var(--space-3); text-transform:uppercase; letter-spacing:0.5px;">
+                <i class="fa-solid fa-circle-xmark"></i> Last Travel: null
+              </div>
+              <div style="font-size:2.8rem; margin-bottom:var(--space-2);">🗺️</div>
+              <h3 style="color:#fff; font-size:var(--text-xl); margin:0 0 6px;">
+                No Last Travel Journey Recorded (null)
+              </h3>
+              <p style="color:var(--clr-text-muted); font-size:var(--text-sm); max-width:480px; margin:0 auto var(--space-5); line-height:1.6;">
+                You currently have no recorded travel journeys. Discover hidden gems, curated hotels, and local guides, then plan your first adventure or record a past trip below.
+              </p>
+              <div style="display:flex; justify-content:center; gap:var(--space-3); flex-wrap:wrap;">
+                <a href="planner.html" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-map-location-dot"></i> Plan First Trip
+                </a>
+                <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('btn-open-add-trip').click()">
+                  <i class="fa-solid fa-plus"></i> Record Journey
+                </button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // Active Last Travel State
+        container.innerHTML = `
+          <div style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.14) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(14, 165, 233, 0.35); border-radius: var(--radius-xl); padding: var(--space-6); position: relative; box-shadow: var(--shadow-md);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:var(--space-3); margin-bottom:var(--space-3);">
+              <div>
+                <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:var(--radius-full); font-size:11px; font-weight:700; background:rgba(16, 185, 129, 0.2); color:#34d399; border:1px solid rgba(16, 185, 129, 0.35); margin-bottom:6px;">
+                  <span style="width:6px; height:6px; border-radius:50%; background:#10b981; animation: glow-pulse 1.5s infinite;"></span>
+                  Latest / Last Completed Travel
+                </div>
+                <h3 style="font-size:clamp(var(--text-xl), 2.5vw, var(--text-2xl)); color:#fff; margin:0 0 4px;">
+                  📍 ${lastTrip.destination} — ${lastTrip.title}
+                </h3>
+                <div style="display:flex; align-items:center; gap:var(--space-3); font-size:12px; color:var(--clr-text-muted); flex-wrap:wrap;">
+                  <span><i class="fa-regular fa-calendar" style="color:var(--clr-primary-light);"></i> ${lastTrip.dates}</span>
+                  <span><i class="fa-solid fa-clock" style="color:var(--clr-accent);"></i> ${lastTrip.duration}</span>
+                  <span><i class="fa-solid fa-users" style="color:#a855f7;"></i> ${lastTrip.travelers}</span>
+                  <span style="color:var(--clr-warning); font-weight:700;">${lastTrip.rating}</span>
+                </div>
+              </div>
+
+              <div style="text-align:right;">
+                <div style="font-size:11px; color:var(--clr-text-muted); text-transform:uppercase;">Total Spent</div>
+                <div style="font-size:var(--text-xl); font-weight:800; color:var(--clr-accent);">${lastTrip.budgetSpent}</div>
+              </div>
+            </div>
+
+            <div style="margin:var(--space-3) 0; font-size:13px; color:var(--clr-text);">
+              <strong style="color:var(--clr-primary-light);"><i class="fa-solid fa-star"></i> Sights & Highlights:</strong> ${lastTrip.highlights}
+            </div>
+
+            <div style="background:rgba(15, 23, 42, 0.6); border-left:3px solid var(--clr-primary); padding:var(--space-3); border-radius:0 var(--radius-sm) var(--radius-sm) 0; margin-bottom:var(--space-4);">
+              <p style="font-size:13px; color:var(--clr-text-muted); margin:0; line-height:1.5;">"${lastTrip.reviewStory}"</p>
+              ${lastTrip.proTip ? `<div style="font-size:12px; color:var(--clr-primary-light); margin-top:4px;"><i class="fa-solid fa-lightbulb"></i> <strong>Pro-Tip:</strong> ${lastTrip.proTip}</div>` : ''}
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-2); border-top:1px solid rgba(148, 163, 184, 0.15); padding-top:var(--space-3);">
+              <span style="font-size:12px; color:var(--clr-text-faint);">Status: <strong style="color:var(--clr-accent);">${lastTrip.status || 'COMPLETED'}</strong></span>
+              <div style="display:flex; gap:var(--space-2);">
+                <a href="destination.html?dest=${encodeURIComponent(lastTrip.destination)}" class="btn btn-outline btn-sm" style="font-size:11px; padding:4px 10px;">
+                  <i class="fa-solid fa-compass"></i> Revisit in Planner
+                </a>
+                <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('btn-open-add-trip').click()" style="font-size:11px; padding:4px 10px;">
+                  <i class="fa-solid fa-plus"></i> Log Another Trip
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 3. Render Past Trips Archive List
+      function renderPastTrips() {
+        const trips = UserProfileStore.getPastTrips();
+        const container = document.getElementById('past-trips-list');
+        const badgeCount = document.getElementById('trip-count-badge');
+        const statTotalTrips = document.getElementById('stat-total-trips');
+        const statTotalDays = document.getElementById('stat-total-days');
+        const statTotalSpend = document.getElementById('stat-total-spend');
+
+        badgeCount.textContent = trips.length;
+        statTotalTrips.textContent = trips.length;
+
+        let totalDays = 0;
+        let totalSpend = 0;
+        trips.forEach(t => {
+          const daysNum = parseInt(t.duration) || 3;
+          totalDays += daysNum;
+          const spendNum = parseInt((t.budgetSpent || '').replace(/[^0-9]/g, '')) || 12000;
+          totalSpend += spendNum;
+        });
+
+        statTotalDays.textContent = totalDays;
+        statTotalSpend.textContent = `₹${(totalSpend / 1000).toFixed(1)}k`;
+
+        if (!trips.length) {
+          container.innerHTML = `
+            <div style="background:var(--clr-surface); border:1px dashed var(--clr-border-light); border-radius:var(--radius-lg); padding:var(--space-6); text-align:center;">
+              <p style="color:var(--clr-text-muted); font-size:var(--text-sm); margin:0;">
+                No additional archived trips found in diary.
+              </p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = '';
+        trips.forEach(t => {
+          const card = document.createElement('div');
+          card.className = 'past-trip-card';
+          card.innerHTML = `
+            <div class="past-trip-header">
+              <div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                  <span class="badge-pill" style="background:rgba(14,165,233,0.15); color:var(--clr-primary-light);">
+                    <i class="fa-solid fa-location-dot"></i> ${t.destination}
+                  </span>
+                  <span class="badge-pill" style="background:rgba(16,185,129,0.15); color:var(--clr-accent);">
+                    <i class="fa-solid fa-check"></i> ${t.status || 'COMPLETED'}
+                  </span>
+                  <span style="font-size:12px; color:var(--clr-text-muted);">
+                    <i class="fa-regular fa-calendar"></i> ${t.dates}
+                  </span>
+                </div>
+                <h3 style="font-size:var(--text-lg); color:#fff; margin:0 0 4px;">
+                  ${t.title}
+                </h3>
+              </div>
+              <div style="text-align:right;">
+                <div style="color:var(--clr-warning); font-size:var(--text-sm); font-weight:700;">
+                  ${t.rating}
+                </div>
+                <div style="font-size:11px; color:var(--clr-text-muted); margin-top:2px;">
+                  Spent: <strong style="color:var(--clr-accent);">${t.budgetSpent}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="past-trip-metrics">
+              <div><i class="fa-solid fa-clock" style="color:var(--clr-primary-light);"></i> <strong>Duration:</strong> ${t.duration}</div>
+              <div><i class="fa-solid fa-users" style="color:var(--clr-accent);"></i> <strong>Travelers:</strong> ${t.travelers}</div>
+              <div><i class="fa-solid fa-coins" style="color:#fbbf24;"></i> <strong>Total Spend:</strong> ${t.budgetSpent}</div>
+            </div>
+
+            <div style="margin:var(--space-3) 0;">
+              <strong style="font-size:12px; color:var(--clr-primary-light);"><i class="fa-solid fa-compass"></i> Key Highlights:</strong>
+              <p style="font-size:13px; color:var(--clr-text); margin:2px 0 0;">${t.highlights}</p>
+            </div>
+
+            <div style="background:var(--clr-surface-2); border-left:3px solid var(--clr-primary); padding:var(--space-3); border-radius:0 var(--radius-sm) var(--radius-sm) 0; margin-bottom:var(--space-3);">
+              <p style="font-size:13px; color:var(--clr-text-muted); margin:0; line-height:1.5;">"${t.reviewStory}"</p>
+              ${t.proTip ? `<div style="font-size:12px; color:var(--clr-primary-light); margin-top:6px;"><i class="fa-solid fa-lightbulb"></i> <strong>Tip:</strong> ${t.proTip}</div>` : ''}
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-2); border-top:1px solid var(--clr-border); padding-top:var(--space-3); margin-top:var(--space-3);">
+              <a href="planner.html?dest=${encodeURIComponent(t.destination)}&tab=experience" class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:11px;">
+                <i class="fa-solid fa-camera"></i> Revisit ${t.destination}
+              </a>
+              <button type="button" class="btn btn-outline btn-sm" onclick="deletePastTrip('${t.id}')" style="padding:4px 10px; font-size:11px; color:var(--clr-danger); border-color:rgba(239,68,68,0.3);">
+                <i class="fa-solid fa-trash"></i> Remove
+              </button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      window.deletePastTrip = function(tripId) {
+        if (confirm('Are you sure you want to remove this journey from your travel history?')) {
+          UserProfileStore.deleteTrip(tripId);
+          renderLastTravelShowcase();
+          renderPastTrips();
+          Toast.info('Travel entry removed from history.');
+        }
+      };
+
+      // 4. Test Buttons for 'null' state and 'restore'
+      document.getElementById('btn-test-null')?.addEventListener('click', () => {
+        UserProfileStore.clearAllTrips();
+        renderLastTravelShowcase();
+        renderPastTrips();
+        Toast.info('Travel history set to null / empty state.');
+      });
+
+      document.getElementById('btn-test-restore')?.addEventListener('click', () => {
+        UserProfileStore.resetDefaultTrips();
+        renderLastTravelShowcase();
+        renderPastTrips();
+        Toast.success('Restored sample past travels.');
+      });
+
+      // 5. Tab navigation
+      const tabPastTrips = document.getElementById('tab-past-trips');
+      const tabTravelStats = document.getElementById('tab-travel-stats');
+      const contentPastTrips = document.getElementById('content-past-trips');
+      const contentTravelStats = document.getElementById('content-travel-stats');
+
+      tabPastTrips.addEventListener('click', () => {
+        tabPastTrips.classList.add('active');
+        tabPastTrips.setAttribute('aria-selected', 'true');
+        tabTravelStats.classList.remove('active');
+        tabTravelStats.setAttribute('aria-selected', 'false');
+        contentPastTrips.style.display = 'block';
+        contentTravelStats.style.display = 'none';
+      });
+
+      tabTravelStats.addEventListener('click', () => {
+        tabTravelStats.classList.add('active');
+        tabTravelStats.setAttribute('aria-selected', 'true');
+        tabPastTrips.classList.remove('active');
+        tabPastTrips.setAttribute('aria-selected', 'false');
+        contentTravelStats.style.display = 'block';
+        contentPastTrips.style.display = 'none';
+      });
+
+      // 6. Edit Profile Details Modal
+      const modalEditProfile = document.getElementById('modal-edit-profile');
+      const btnOpenEditProfile = document.getElementById('btn-open-edit-profile');
+      const btnCloseEditModal = document.getElementById('btn-close-edit-modal');
+      const btnCancelEditProfile = document.getElementById('btn-cancel-edit-profile');
+      const formEditProfile = document.getElementById('form-edit-profile');
+
+      btnOpenEditProfile.addEventListener('click', () => {
+        const u = UserProfileStore.getProfile();
+        document.getElementById('input-fullname').value = u.fullName || '';
+        document.getElementById('input-email').value = u.email || '';
+        document.getElementById('input-phone').value = u.phone || '';
+        document.getElementById('input-city').value = u.homeCity || '';
+        document.getElementById('input-style').value = u.travelStyle || 'Moderate Explorer';
+        document.getElementById('input-emergency').value = u.emergencyContact || '';
+        document.getElementById('input-bio').value = u.bio || '';
+        modalEditProfile.classList.add('open');
+      });
+
+      function closeEditModal() {
+        modalEditProfile.classList.remove('open');
+      }
+
+      btnCloseEditModal.addEventListener('click', closeEditModal);
+      btnCancelEditProfile.addEventListener('click', closeEditModal);
+
+      formEditProfile.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('input-fullname').value.trim();
+        const email = document.getElementById('input-email').value.trim();
+        const phone = document.getElementById('input-phone').value.trim();
+        const homeCity = document.getElementById('input-city').value.trim();
+        const travelStyle = document.getElementById('input-style').value;
+        const emergencyContact = document.getElementById('input-emergency').value.trim();
+        const bio = document.getElementById('input-bio').value.trim();
+
+        const updated = { fullName, email, phone, homeCity, travelStyle, emergencyContact, bio };
+        UserProfileStore.updateProfile(updated);
+        AdminUserStore.updateUser(email, updated);
+
+        refreshProfileView();
+        closeEditModal();
+        Toast.success('Profile details updated successfully!');
+      });
+
+      // 7. Upgrade Profile Photo Modal & Actions
+      const modalEditAvatar = document.getElementById('modal-edit-avatar');
+      const btnCloseAvatarModal = document.getElementById('btn-close-avatar-modal');
+      const btnCancelAvatar = document.getElementById('btn-cancel-avatar');
+      const btnSaveAvatar = document.getElementById('btn-save-avatar');
+      const btnResetAvatar = document.getElementById('btn-reset-avatar');
+      const btnUpgradePhoto = document.getElementById('btn-upgrade-photo');
+      const avatarWrapper = document.getElementById('profile-avatar-wrapper');
+      const btnEditAvatar = document.getElementById('btn-edit-avatar');
+      const avatarDropzone = document.getElementById('avatar-dropzone');
+      const inputAvatarFile = document.getElementById('input-avatar-file');
+      const inputAvatarUrl = document.getElementById('input-avatar-url');
+      const btnPreviewUrl = document.getElementById('btn-preview-url');
+      const previewImg = document.getElementById('avatar-preview-img');
+      const previewEmoji = document.getElementById('avatar-preview-emoji');
+      const photoPresets = document.querySelectorAll('.avatar-photo-btn');
+      const avatarButtons = document.querySelectorAll('.avatar-choice-btn');
+      let selectedAvatar = '🧭';
+
+      function openAvatarModal() {
+        const u = UserProfileStore.getProfile();
+        pendingUploadedAvatar = null;
+        inputAvatarUrl.value = '';
+
+        // Clear all active states
+        photoPresets.forEach(b => b.classList.remove('active'));
+        avatarButtons.forEach(b => b.classList.remove('active'));
+
+        const currentAvatar = u ? u.avatar : '🧭';
+        const isImage = currentAvatar && (currentAvatar.startsWith('http') || currentAvatar.startsWith('data:image'));
+
+        if (isImage) {
+          previewImg.src = currentAvatar;
+          previewImg.style.display = 'block';
+          previewEmoji.style.display = 'none';
+          pendingUploadedAvatar = currentAvatar;
+
+          // If current matches one of our curated presets, highlight it
+          photoPresets.forEach(b => {
+            if (b.getAttribute('data-url') === currentAvatar) {
+              b.classList.add('active');
+            }
+          });
+        } else {
+          selectedAvatar = currentAvatar || '🧭';
+          previewImg.style.display = 'none';
+          previewEmoji.textContent = selectedAvatar;
+          previewEmoji.style.display = 'inline-block';
+
+          // Highlight matching insignia
+          avatarButtons.forEach(b => {
+            if (b.getAttribute('data-avatar') === selectedAvatar) {
+              b.classList.add('active');
+            }
+          });
+        }
+        modalEditAvatar.classList.add('open');
+      }
+
+      function closeAvatarModal() {
+        modalEditAvatar.classList.remove('open');
+      }
+
+      // Trigger buttons to open modal
+      btnUpgradePhoto?.addEventListener('click', openAvatarModal);
+      avatarWrapper?.addEventListener('click', openAvatarModal);
+      btnEditAvatar?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openAvatarModal();
+      });
+
+      btnCloseAvatarModal?.addEventListener('click', closeAvatarModal);
+      btnCancelAvatar?.addEventListener('click', closeAvatarModal);
+
+      // Process image file
+      function handleImageFile(file) {
+        if (!file || !file.type.startsWith('image/')) {
+          Toast.error('Please select a valid image file (JPG, PNG, WEBP, GIF)');
+          return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+          Toast.error('Please choose an image smaller than 5MB');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          pendingUploadedAvatar = evt.target.result;
+          previewImg.src = pendingUploadedAvatar;
+          previewImg.style.display = 'block';
+          previewEmoji.style.display = 'none';
+          inputAvatarUrl.value = '';
+          photoPresets.forEach(b => b.classList.remove('active'));
+          avatarButtons.forEach(b => b.classList.remove('active'));
+          Toast.info('Photo loaded in preview! Click "Save & Apply Photo" to upgrade.');
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // File input change handler
+      inputAvatarFile?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleImageFile(file);
+      });
+
+      // Drag & Drop handlers on dropzone
+      if (avatarDropzone) {
+        ['dragenter', 'dragover'].forEach(eventName => {
+          avatarDropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            avatarDropzone.classList.add('dragover');
+          });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+          avatarDropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            avatarDropzone.classList.remove('dragover');
+          });
+        });
+
+        avatarDropzone.addEventListener('drop', (e) => {
+          const dt = e.dataTransfer;
+          const files = dt.files;
+          if (files && files.length > 0) {
+            handleImageFile(files[0]);
+          }
+        });
+      }
+
+      // Curated HD Photo presets
+      photoPresets.forEach(btn => {
+        btn.addEventListener('click', () => {
+          photoPresets.forEach(b => b.classList.remove('active'));
+          avatarButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const photoUrl = btn.getAttribute('data-url');
+          pendingUploadedAvatar = photoUrl;
+          inputAvatarUrl.value = '';
+          previewImg.src = photoUrl;
+          previewImg.style.display = 'block';
+          previewEmoji.style.display = 'none';
+        });
+      });
+
+      // Direct URL preview button & input
+      function previewCustomUrl() {
+        const val = inputAvatarUrl.value.trim();
+        if (val) {
+          pendingUploadedAvatar = val;
+          previewImg.src = val;
+          previewImg.style.display = 'block';
+          previewEmoji.style.display = 'none';
+          photoPresets.forEach(b => b.classList.remove('active'));
+          avatarButtons.forEach(b => b.classList.remove('active'));
+        }
+      }
+
+      btnPreviewUrl?.addEventListener('click', previewCustomUrl);
+      inputAvatarUrl?.addEventListener('input', previewCustomUrl);
+
+      // Travel Insignia Buttons
+      avatarButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          avatarButtons.forEach(b => b.classList.remove('active'));
+          photoPresets.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          selectedAvatar = btn.getAttribute('data-avatar');
+          pendingUploadedAvatar = null;
+          inputAvatarUrl.value = '';
+          previewImg.style.display = 'none';
+          previewEmoji.textContent = selectedAvatar;
+          previewEmoji.style.display = 'inline-block';
+        });
+      });
+
+      // Reset to Default Insignia
+      btnResetAvatar?.addEventListener('click', () => {
+        pendingUploadedAvatar = null;
+        inputAvatarUrl.value = '';
+        photoPresets.forEach(b => b.classList.remove('active'));
+        avatarButtons.forEach(b => b.classList.remove('active'));
+        const compassBtn = document.querySelector('.avatar-choice-btn[data-avatar="🧭"]');
+        if (compassBtn) compassBtn.classList.add('active');
+        selectedAvatar = '🧭';
+        previewImg.style.display = 'none';
+        previewEmoji.textContent = '🧭';
+        previewEmoji.style.display = 'inline-block';
+        Toast.info('Reset preview to default Compass insignia.');
+      });
+
+      // Save & Upgrade
+      btnSaveAvatar?.addEventListener('click', () => {
+        const customUrl = inputAvatarUrl.value.trim();
+        const avatarToSave = pendingUploadedAvatar || customUrl || selectedAvatar;
+
+        UserProfileStore.updateProfile({ avatar: avatarToSave });
+        const user = UserProfileStore.getProfile();
+        if (user && user.email) {
+          AdminUserStore.updateUser(user.email, { avatar: avatarToSave });
+        }
+
+        refreshProfileView();
+        if (typeof updateNavAuth === 'function') {
+          updateNavAuth();
+        }
+        closeAvatarModal();
+        Toast.success('Profile photo upgraded successfully!');
+      });
+
+      // 8. Add Past Trip Modal
+      const modalAddTrip = document.getElementById('modal-add-trip');
+      const btnOpenAddTrip = document.getElementById('btn-open-add-trip');
+      const btnCloseTripModal = document.getElementById('btn-close-trip-modal');
+      const btnCancelTrip = document.getElementById('btn-cancel-trip');
+      const formAddTrip = document.getElementById('form-add-trip');
+
+      btnOpenAddTrip.addEventListener('click', () => {
+        modalAddTrip.classList.add('open');
+      });
+
+      function closeTripModal() {
+        modalAddTrip.classList.remove('open');
+      }
+
+      btnCloseTripModal.addEventListener('click', closeTripModal);
+      btnCancelTrip.addEventListener('click', closeTripModal);
+
+      formAddTrip.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dest = document.getElementById('trip-destination').value;
+        const dur = document.getElementById('trip-duration').value;
+        const title = document.getElementById('trip-title').value.trim();
+        const dates = document.getElementById('trip-dates').value.trim();
+        const spend = document.getElementById('trip-spend').value.trim();
+        const travelers = document.getElementById('trip-travelers').value;
+        const rating = document.getElementById('trip-rating').value;
+        const highlights = document.getElementById('trip-highlights').value.trim();
+        const story = document.getElementById('trip-story').value.trim();
+        const tip = document.getElementById('trip-tip').value.trim();
+
+        const newTrip = {
+          destination: dest,
+          title,
+          duration: dur,
+          dates,
+          budgetSpent: spend.startsWith('₹') ? spend : `₹${spend}`,
+          travelers,
+          rating,
+          highlights,
+          reviewStory: story,
+          proTip: tip,
+          status: 'COMPLETED'
+        };
+
+        UserProfileStore.addTrip(newTrip);
+        renderLastTravelShowcase();
+        renderPastTrips();
+        formAddTrip.reset();
+        closeTripModal();
+        Toast.success(`Added ${dest} as your last travel journey!`);
+      });
+
+      // Initialize View
+      refreshProfileView();
+    });
+  </script>
+</body>
+</html>

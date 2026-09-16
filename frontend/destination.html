@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explore Destination | Compass</title>
+  <meta name="description" content="Discover top attractions for a destination and plan your trip." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/destination.css" />
+</head>
+<body>
+  <header class="dest-nav">
+    <a href="index.html" class="nav-logo" aria-label="Compass Home">
+      <div class="nav-logo-icon">🧭</div>
+      <span class="nav-logo-text">Com<span>pass</span></span>
+    </a>
+    <a href="index.html" class="dest-back-btn">&#8592; Back to Explore</a>
+  </header>
+  <section id="hero" class="dest-hero">
+    <h1 id="dest-name">Destination</h1>
+    <p id="dest-tagline">Explore the highlights</p>
+  </section>
+  <section id="spots-section" class="dest-section">
+    <div class="dest-container">
+      <h2 class="dest-section-title">Top Attractions</h2>
+      <div id="spot-gallery" class="dest-gallery-grid"></div>
+    </div>
+  </section>
+  <div class="spot-modal" id="spot-modal" aria-hidden="true">
+    <div class="spot-modal-content">
+      <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+      <h3 id="modal-title"></h3>
+      <p id="modal-desc"></p>
+      <div id="modal-carousel" class="modal-gallery"></div>
+      <p><strong>Best time to visit:</strong> <span id="modal-besttime"></span></p>
+      <p><strong>Travel tips:</strong> <span id="modal-tips"></span></p>
+      <a href="planner.html" class="plan-btn" id="plan-button">Plan My Visit &rarr;</a>
+    </div>
+  </div>
+  <script src="js/destination.js"></script>
+</body>
+</html>
